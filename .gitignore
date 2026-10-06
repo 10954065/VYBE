@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Expo / React Native
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+apps/mobile/*.jks
+apps/mobile/*.p8
+apps/mobile/*.p12
+apps/mobile/*.key
+apps/mobile/*.mobileprovision
+.metro-health-check*
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Build outputs
+build/
+dist/
+*.tsbuildinfo
+
+# Turborepo / caches
+.turbo/
+
+# Testing
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Local agent/assistant tooling — never commit
+.claude/
+CLAUDE.md
