@@ -9,7 +9,7 @@ create table public.vibes (
   ),
   text text,
   place_id uuid references public.places (id),
-  crew_id uuid references public.crews (id),
+  crew_id uuid references public.crews (id) on delete cascade,
   -- Precise coordinates are private by default; never read directly by a
   -- public query path. Use extensions.to_approximate_location() (see
   -- packages/shared's map provider) when showing a vibe's rough location.

@@ -14,7 +14,7 @@ create table public.places (
   lat double precision not null,
   lng double precision not null,
   cover_image_url text,
-  business_id uuid references public.businesses (id),
+  business_id uuid references public.businesses (id) on delete set null,
   popularity_score numeric not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

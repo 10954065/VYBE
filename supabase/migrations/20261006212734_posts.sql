@@ -2,7 +2,7 @@ create table public.posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles (id) on delete cascade,
   city_id uuid references public.cities (id),
-  crew_id uuid references public.crews (id),
+  crew_id uuid references public.crews (id) on delete cascade,
   kind text not null default 'text' check (kind in ('text', 'image', 'video', 'poll')),
   body text,
   poll_options jsonb,

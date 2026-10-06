@@ -10,7 +10,7 @@ create table public.reports (
   ),
   details text,
   status text not null default 'pending' check (status in ('pending', 'reviewing', 'resolved', 'dismissed')),
-  resolved_by uuid references public.profiles (id),
+  resolved_by uuid references public.profiles (id) on delete set null,
   resolved_at timestamptz,
   created_at timestamptz not null default now()
 );
