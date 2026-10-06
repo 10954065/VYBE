@@ -44,4 +44,13 @@ analytics
 
 ## Seed data
 
-`supabase/seed.sql`: the 6 cities (Accra launched, the rest flagged `is_launched = false`), the badge catalog, ~12 fictional Accra places across categories, and 3 starter challenges. Deliberately does **not** seed fake `auth.users` rows via raw SQL — that schema is Supabase-version-sensitive and fragile to hand-craft. Demo user accounts should come from a dev script against the Auth Admin API (service role), planned for the auth phase.
+`supabase/seed.sql`: the 6 cities (Accra launched, the rest flagged `is_launched = false`), the badge catalog, ~12 fictional Accra places across categories, and 3 starter challenges. Deliberately does **not** seed fake `auth.users` rows via raw SQL — that schema is Supabase-version-sensitive and fragile to hand-craft. Demo user accounts come from `apps/web/scripts/seed-dev-users.ts` instead (`npm run db:seed-users` from `apps/web`), which goes through the real Auth Admin API — tested against a local stack, including idempotency (re-running skips existing accounts) and confirming the `handle_new_user`/`handle_new_profile_preferences` triggers fire correctly for real signups.
+
+## Testing this locally
+
+```bash
+npx supabase start   # requires Docker
+npx supabase db reset  # drop, recreate, apply all migrations + seed.sql
+npm run db:seed-users --workspace=@vybe/web   # demo auth users (needs apps/web/.env.local)
+npx supabase stop
+```

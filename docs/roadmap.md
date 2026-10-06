@@ -3,8 +3,8 @@
 Each phase ships as its own set of commits. Design (Stitch) integration happens inside the relevant phase once assets are available — it does not block the architecture underneath it.
 
 - [x] **Phase 1 — Foundation**: repo audit, monorepo architecture, dependencies, tooling, environment setup.
-- [ ] **Phase 2 — Database**: schema, migrations, RLS policies, seed data.
-- [ ] **Phase 3 — Auth & profiles**: sign up/login/logout/reset, sessions, onboarding.
+- [x] **Phase 2 — Database**: schema, migrations, RLS policies, seed data. Validated against a live local Supabase stack, not just parse-checked.
+- [~] **Phase 3 — Auth & profiles**: Supabase client wiring done (mobile: encrypted-session storage; web: `@supabase/ssr` server/browser/admin clients + session-refresh middleware), dev user seeding script done. Still open: actual sign-up/login/onboarding screens, password reset, account deletion flow.
 - [ ] **Phase 4 — Home feed**: posts, reactions, comments, following, pagination.
 - [ ] **Phase 5 — Real world**: vibes, places, events, check-ins.
 - [ ] **Phase 6 — Crews**.
