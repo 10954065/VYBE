@@ -1,15 +1,47 @@
-# Database Schema (planned — Phase 2)
+# Database Schema
 
-Not yet implemented. This is the planned table list and key relationships for the next phase, so the API/mobile work in later phases has a stable contract to build against.
+Implemented in `supabase/migrations/`. 15 migrations, applied in order, each a complete vertical slice (table + indexes + triggers + RLS) rather than schema-then-policies-later.
 
-## Core tables
+## Migration order (and why)
 
-`cities`, `users`, `profiles`, `user_interests`, `follows`, `posts`, `post_media`, `comments`, `reactions`, `saved_posts`, `vibes`, `places`, `events`, `event_attendees`, `check_ins`, `crews`, `crew_members`, `crew_posts`, `challenges`, `challenge_participants`, `xp_transactions`, `streaks`, `badges`, `user_badges`, `notifications`, `notification_preferences`, `businesses`, `business_staff`, `reports`, `blocks`, `analytics_events`.
+```
+extensions_and_helpers  -- set_updated_at() trigger fn, is_content_visible_to() visibility fn
+cities
+profiles                -- + user_interests, auth.users -> profiles trigger
+follows
+crews                   -- + crew_members (moved early: posts/vibes/events reference crew_id)
+businesses              -- + business_staff (moved early: places/events reference business_id)
+places
+posts                   -- + post_media, comments, reactions, saved_posts
+vibes
+events                  -- + event_attendees
+check_ins
+gamification            -- xp_transactions, streaks, badges, user_badges, challenges, challenge_participants
+notifications           -- + notification_preferences
+moderation              -- reports, blocks
+analytics
+```
 
-## Conventions (to apply once migrations start)
+`crews`, `businesses` and `places` run before `posts`/`vibes`/`events` specifically so those tables' `crew_id`/`business_id`/`place_id` columns can be real foreign keys from the start — no deferred `ALTER TABLE ... ADD CONSTRAINT` once a dependency finally exists.
 
-- UUID primary keys.
-- `created_at` / `updated_at` on every table; soft-delete (`deleted_at`) where content can be removed without losing moderation history.
-- Row Level Security enabled on every table from its first migration.
-- XP is never written directly to a user row — only ever inserted as a row in `xp_transactions`; current XP is derived.
-- Location columns store precise coordinates only where the owning user explicitly opted in to sharing; public-facing reads go through an approximate-location transform (see `packages/shared/src/map/provider.ts`).
+## Deliberate deviations from the original table list
+
+- **No separate `crew_posts` table.** A crew post is just a row in `posts` with `crew_id` set and `visibility = 'crew'`. A second posts-shaped table for crew content would duplicate the post/comment/reaction logic that already exists — exactly the kind of duplication the project's own coding standards rule out. Documenting the call here per that same standard.
+- **No `users` table.** `auth.users` (Supabase Auth) is the identity table; `public.profiles` is the 1:1 public-facing row, created automatically by a trigger on signup (`handle_new_user()`).
+- **Event/check-in/vibe posts are not posts.** The feed is designed to aggregate across `posts`, `vibes`, `check_ins` and event highlights at the query layer (the planned `FeedRankingService`, Phase 4) rather than cramming every content type into one polymorphic table.
+
+## Conventions actually applied
+
+- `gen_random_uuid()` (built into Postgres 13+ core) for UUID PKs; `analytics_events` uses a `bigint identity` instead since it's high-volume and never an FK target.
+- `created_at`/`updated_at` via a shared `set_updated_at()` trigger; `deleted_at` soft-delete on content that needs a moderation trail (`profiles`, `posts`, `comments`, `crews`, `businesses`, `places`, `events`). `check_ins`, `vibes`, `xp_transactions` are immutable/ephemeral by design — no soft delete, no update path for most fields.
+- **Every table has RLS enabled.** A table with no matching policy for an operation denies it by default — several tables (e.g. `xp_transactions`, `streaks`, `badges`, `notifications`, `challenges`) intentionally have no client-facing INSERT/UPDATE policy at all, because that data must only ever be written by server-side (service-role) code in response to a verified action. This is what makes "XP transactions are auditable" and "challenges can't be self-completed" actually true, not just documented intent.
+- **One shared visibility function**, `is_content_visible_to(viewer, owner, visibility, crew_id)`, used by `posts`, `vibes`, `events` and `check_ins` RLS policies. Visibility enum is consistent everywhere: `everyone | followers | friends | crew | only_me`. Blocks (either direction) always hide content, checked inside this function.
+- **Check-ins are rate-limited server-side**: a `BEFORE INSERT` trigger rejects a check-in within 120 seconds of the user's previous one (mirrors `CHECK_IN_RATE_LIMIT_SECONDS` in `packages/shared`).
+- **Check-ins drive event attendance**, not the other way around: checking in against an event upserts that user's `event_attendees.status` to `checked_in` via trigger; clients can only ever set `interested | going | cancelled` themselves.
+- **Crew membership approval is server-authoritative**: a trigger sets `crew_members.status` based on the crew's `privacy`, overriding whatever the insert claims — a private crew cannot be joined by just inserting `status = 'approved'`.
+- **Current XP is derived, not stored**: `user_xp_totals` is a view summing `xp_transactions`, not a column that could drift from its ledger.
+- Precise `lat`/`lng` on `vibes`/`check_ins` is user location data and stays private by default (no public SELECT policy exposes it beyond the owner and whoever the visibility rules admit); `places` coordinates are intentionally public — they're business/venue listings, not personal location data.
+
+## Seed data
+
+`supabase/seed.sql`: the 6 cities (Accra launched, the rest flagged `is_launched = false`), the badge catalog, ~12 fictional Accra places across categories, and 3 starter challenges. Deliberately does **not** seed fake `auth.users` rows via raw SQL — that schema is Supabase-version-sensitive and fragile to hand-craft. Demo user accounts should come from a dev script against the Auth Admin API (service role), planned for the auth phase.
