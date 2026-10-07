@@ -5,6 +5,9 @@ export default function AppLayout() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="post/[id]" options={{ title: 'Post' }} />
+      <Stack.Screen name="place/[id]" options={{ title: 'Place' }} />
+      <Stack.Screen name="event/[id]" options={{ title: 'Event' }} />
+      <Stack.Screen name="event/create" options={{ title: 'New event' }} />
     </Stack>
   );
 }
