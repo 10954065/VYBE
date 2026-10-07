@@ -1482,6 +1482,15 @@ export type Database = {
     };
     Functions: {
       get_crew_privacy: { Args: { target_crew_id: string }; Returns: string };
+      get_event_attendee_summary: {
+        Args: { target_event_id: string };
+        Returns: {
+          checked_in_count: number;
+          going_count: number;
+          interested_count: number;
+          viewer_status: string;
+        }[];
+      };
       get_home_feed: {
         Args: { before_created_at?: string; before_id?: string; page_size?: number };
         Returns: {

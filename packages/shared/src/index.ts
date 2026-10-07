@@ -10,3 +10,7 @@ export * from "./schemas/profiles";
 export * from "./schemas/auth";
 export * from "./schemas/posts";
 export * from "./schemas/follows";
+export * from "./schemas/places";
+export * from "./schemas/vibes";
+export * from "./schemas/events";
+export * from "./schemas/check-ins";
