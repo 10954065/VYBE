@@ -4,7 +4,7 @@
 
 The visual language is generated in Stitch, not hand-picked — see the `VYBE Social Discovery App Design` Stitch project (18 screens, one shared design system). `docs/roadmap.md` deferred visual polish until these assets existed; they now do, and this is the first pass of wiring them into the actual app.
 
-Stitch's screen exports and screenshots are served from signed Google-account-scoped URLs that only resolve inside an authenticated browser session — they can't be curled or fetched headlessly from this environment. The design system's `designMd` (colors, typography scale, spacing, shape, elevation/glow, and per-component specs for buttons, chips, cards, feed rows, inputs, and the nav dock) is fully machine-readable through the Stitch MCP itself, though, and detailed enough to implement faithfully without the HTML. That doc is the source of truth; screen titles (`Sign In — Welcome Back to VYBE`, `Home — Live Accra Vibe`, `Crews — Community & Challenges`, etc.) describe intent and content per screen.
+Stitch's own screen-export and screenshot URLs are signed and Google-account-scoped — they only resolve inside an authenticated browser session, and can't be curled or fetched headlessly from this environment (confirmed: both a fresh Playwright/Chrome-DevTools session and a direct API-key-authenticated request hit Google's sign-in page, since the MCP's API key authenticates `stitch.googleapis.com` calls, not the separate `usercontent.google.com` content host). What *did* work: a real local export of the whole Stitch project (every screen's `code.html` + `screen.png`, plus the design system's `DESIGN.md`), downloaded through an authenticated normal browser and read straight off disk. From the first onboarding pass onward, that export — not the design-system markdown alone — is the source of truth: it carries exact copy, layout, and even working photo URLs (`lh3.googleusercontent.com/aida-public/...`, which — unlike the screenshot/export URLs — turned out to be genuinely public and directly usable as `<Image>` sources). The design system's `designMd` (colors, typography scale, spacing, shape, elevation/glow, per-component specs) is still what the first pass — sign-in/sign-up/forgot-password, before the real export existed — was built from.
 
 ## What changed
 
@@ -26,9 +26,8 @@ Live browser, local stack: signed up a confirmed test user via the Admin API, co
 
 ## Deferred
 
-This is screen 3 of 18 in the Stitch project (sign-in, sign-up, forgot-password — the simplest, most self-contained screens, done first to prove the token/primitive foundation). Still ahead, in roughly the order the screens will matter:
+Sign-in/sign-up/forgot-password (this doc) and the 3-step onboarding flow (`docs/onboarding.md` — a real backend expansion, not just a reskin) are done. Still ahead, in roughly the order the screens will matter:
 
-- **Onboarding** (3 steps in Stitch, vs. the current single-screen flow) — needs a real design decision on whether to split into steps now or keep it one screen with the new look.
 - **Home feed, Explore, Crew detail, Profile** — functionally complete; need a direct per-screen pass against their Stitch counterparts (card elevation tiers, feed row treatment, gamification chips) beyond what the primitive cascade already gave them.
 - **Direct Chat and Squad Group Chat** — Stitch generated both, but there is no messages/conversations table or backend anywhere in Phases 1–6. This is a new feature, not a reskin, and isn't in `docs/roadmap.md`. Flagged, not started.
 - **App icon and splash screen** — still the unmodified Expo starter logo and blue gradient. Stitch generates app *screens*, not an app icon/logomark asset, so this needs either a dedicated asset or a deliberate decision to typeset a wordmark instead.
