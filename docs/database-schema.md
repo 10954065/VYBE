@@ -21,6 +21,7 @@ notifications           -- + notification_preferences
 moderation              -- reports, blocks
 analytics
 feed                    -- get_home_feed(), get_suggested_people() — RPCs, no new tables
+event_attendees_summary -- get_event_attendee_summary() — RPC, no new tables
 ```
 
 `crews`, `businesses` and `places` run before `posts`/`vibes`/`events` specifically so those tables' `crew_id`/`business_id`/`place_id` columns can be real foreign keys from the start — no deferred `ALTER TABLE ... ADD CONSTRAINT` once a dependency finally exists.
