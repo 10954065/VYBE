@@ -41,6 +41,11 @@ analytics
 - **Crew membership approval is server-authoritative**: a trigger sets `crew_members.status` based on the crew's `privacy`, overriding whatever the insert claims — a private crew cannot be joined by just inserting `status = 'approved'`.
 - **Current XP is derived, not stored**: `user_xp_totals` is a view summing `xp_transactions`, not a column that could drift from its ledger.
 - Precise `lat`/`lng` on `vibes`/`check_ins` is user location data and stays private by default (no public SELECT policy exposes it beyond the owner and whoever the visibility rules admit); `places` coordinates are intentionally public — they're business/venue listings, not personal location data.
+- Every profile-referencing (and crew-/business-referencing) foreign key has an explicit `ON DELETE` action — `cascade` or `set null`, deliberately chosen per table, never the Postgres default of blocking the delete. Verified by actually deleting a user wired into every table in the graph (see the `fix(db)` commit) rather than just reading the FK clauses.
+
+## Generated types
+
+`packages/shared/src/database.types.ts` is generated from the live schema via `npm run db:types --workspace=@vybe/shared` (needs `supabase start` running locally) — never hand-edited. `createSupabaseClient` (packages/shared) and the web `@supabase/ssr` clients are both typed with it, so `.from("posts")` etc. is checked against the actual columns, not `any`. Regenerate after every migration that changes the schema.
 
 ## Seed data
 

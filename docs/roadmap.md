@@ -4,7 +4,7 @@ Each phase ships as its own set of commits. Design (Stitch) integration happens 
 
 - [x] **Phase 1 — Foundation**: repo audit, monorepo architecture, dependencies, tooling, environment setup.
 - [x] **Phase 2 — Database**: schema, migrations, RLS policies, seed data. Validated against a live local Supabase stack, not just parse-checked.
-- [~] **Phase 3 — Auth & profiles**: Supabase client wiring done (mobile: encrypted-session storage; web: `@supabase/ssr` server/browser/admin clients + session-refresh middleware), dev user seeding script done. Still open: actual sign-up/login/onboarding screens, password reset, account deletion flow.
+- [x] **Phase 3 — Auth & profiles**: sign up, sign in, password reset request, session-gated routing (`Stack.Protected`), onboarding (username/display name/interests), profile view, logout, and account deletion (mobile → `apps/web` API → Auth Admin API). Verified end-to-end in a real browser against the live local stack, not just typechecked — see `docs/database-schema.md` for the bugs that surfaced only by doing that (an SSR crash, a `SecureStore` web gap, and a Zod datetime bug that caused a real infinite refetch loop). Not yet built: profile editing, avatar upload (needs Storage, not yet configured), email-confirmation deep linking.
 - [ ] **Phase 4 — Home feed**: posts, reactions, comments, following, pagination.
 - [ ] **Phase 5 — Real world**: vibes, places, events, check-ins.
 - [ ] **Phase 6 — Crews**.
