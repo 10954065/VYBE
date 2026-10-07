@@ -1482,6 +1482,36 @@ export type Database = {
     };
     Functions: {
       get_crew_privacy: { Args: { target_crew_id: string }; Returns: string };
+      get_home_feed: {
+        Args: { before_created_at?: string; before_id?: string; page_size?: number };
+        Returns: {
+          author_avatar_url: string;
+          author_display_name: string;
+          author_id: string;
+          author_username: string;
+          body: string;
+          city_id: string;
+          comment_count: number;
+          created_at: string;
+          crew_id: string;
+          id: string;
+          kind: string;
+          poll_options: Json;
+          reaction_count: number;
+          updated_at: string;
+          viewer_has_reacted: boolean;
+          visibility: string;
+        }[];
+      };
+      get_suggested_people: {
+        Args: { result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          id: string;
+          username: string;
+        }[];
+      };
       is_business_staff: { Args: { target_business_id: string; viewer: string }; Returns: boolean };
       is_content_visible_to: {
         Args: { content_crew_id: string; owner: string; viewer: string; visibility: string };

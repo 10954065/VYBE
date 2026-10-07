@@ -7,7 +7,7 @@
   "types": "src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "db:types": "supabase gen types typescript --local --workdir ../.. > src/database.types.ts"
+    "db:types": "npx supabase gen types typescript --local --workdir ../.. > src/database.types.ts && prettier --write src/database.types.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

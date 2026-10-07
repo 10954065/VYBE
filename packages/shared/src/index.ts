@@ -8,3 +8,5 @@ export type { Database } from "./database.types";
 export * from "./schemas/cities";
 export * from "./schemas/profiles";
 export * from "./schemas/auth";
+export * from "./schemas/posts";
+export * from "./schemas/follows";
