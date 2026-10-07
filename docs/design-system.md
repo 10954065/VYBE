@@ -1,0 +1,34 @@
+# Design system: Afro-Electric Neon Obsidian
+
+## Where it comes from
+
+The visual language is generated in Stitch, not hand-picked — see the `VYBE Social Discovery App Design` Stitch project (18 screens, one shared design system). `docs/roadmap.md` deferred visual polish until these assets existed; they now do, and this is the first pass of wiring them into the actual app.
+
+Stitch's screen exports and screenshots are served from signed Google-account-scoped URLs that only resolve inside an authenticated browser session — they can't be curled or fetched headlessly from this environment. The design system's `designMd` (colors, typography scale, spacing, shape, elevation/glow, and per-component specs for buttons, chips, cards, feed rows, inputs, and the nav dock) is fully machine-readable through the Stitch MCP itself, though, and detailed enough to implement faithfully without the HTML. That doc is the source of truth; screen titles (`Sign In — Welcome Back to VYBE`, `Home — Live Accra Vibe`, `Crews — Community & Challenges`, etc.) describe intent and content per screen.
+
+## What changed
+
+- **The product is dark-only now**, on purpose. Stitch's design system was generated with `colorMode: DARK` and no light counterpart — the brand ("deep obsidian... saturated neon gradients... club lighting, concert wristbands") doesn't have a light-mode identity to fall back to. `constants/theme.ts`'s `Colors` export is now a single flat palette (previously `Colors.light` / `Colors.dark`, switched by system scheme); `useTheme()` always returns it. `app/_layout.tsx` no longer switches `DarkTheme`/`DefaultTheme` by `useColorScheme()` — it always uses a custom nav theme built from the same tokens.
+- **Plus Jakarta Sans** (`@expo-google-fonts/plus-jakarta-sans`) replaces the system font, loaded via `useFonts` in the root layout with four weights (400/600/700/800) matching the design system's type scale. The root layout now blocks on `fontsLoaded` before rendering, same pattern as the existing session/profile loading gate.
+- **Themed primitives** (`themed-text.tsx`, `themed-button.tsx`, `themed-view.tsx`, `themed-text-input.tsx`) were rebuilt on the new tokens: pill-shaped buttons and inputs, a violet glow on the primary button (per the design system's "Neon Aura" spec), and a retuned type scale. Because every existing screen already composes these primitives rather than styling raw `Text`/`Pressable`/`TextInput`, the new look cascaded automatically to screens this phase didn't touch directly — the Phase 4 feed composer, suggested-people strip, Phase 5 explore segmented control, and Phase 6 crew cards all picked up the new palette and pill shapes for free. Confirmed live, not assumed.
+- **Auth screens** (`sign-in.tsx`, `sign-up.tsx`, `forgot-password.tsx`) got an explicit pass: a hero "VYBE" wordmark, screen-specific taglines matching the Stitch screen titles, and layout tweaks (plain `View` instead of a `ThemedView` for field grouping, since the old code themed a wrapper that only ever rendered its parent's own background color).
+
+## Two real bugs found during this pass
+
+Both were visible only once the floating web tab bar's chrome actually looked intentional enough to notice what was wrong with it — the same "only showed up once there was something to look at" pattern as the Phase 5 tab-bar-pinned-to-the-top bug.
+
+1. **`app-tabs.web.tsx` was still the unmodified Expo starter scaffold.** It rendered the literal text "Expo Starter" as the brand mark and linked out to `https://docs.expo.dev`, and its `TabList` only had two triggers — `home` and `explore`. `profile.tsx` has existed since Phase 3 with no way to reach it from the web tab bar at all. Fixed: removed the leftover branding/link, added the missing `profile` `TabTrigger`, and restyled the dock (translucent pill, hairline border, glow on the active tab) to match the design system's "Mobile Navigation Dock" component spec. The native tab bar (`app-tabs.tsx`, SF Symbols-based) already had all three tabs correctly — only the web fallback was missing one.
+2. **`BottomTabInset` was always `0` on web.** `Platform.select({ ios: 50, android: 80 })` has no `web` case, so every screen that pads its bottom content by `BottomTabInset + Spacing.n` (home, explore, profile) reserved zero space for the floating dock on web specifically. Invisible on home/explore because their lists just clip under the dock quietly; glaring on profile, where the red "Delete account" pill rendered half-swallowed behind the tab bar. Fixed by adding `web: 96` (measured against the dock's actual rendered height) to the `Platform.select`.
+
+## Verified
+
+Live browser, local stack: signed up a confirmed test user via the Admin API, completed onboarding server-side, walked sign-in → home → explore → profile, and screenshotted each. Confirmed the primitive-level reskin reached already-built screens without edits, confirmed both tab-bar fixes (profile reachable, delete-account button clear of the dock), and confirmed `npm run typecheck` / `npm run lint` stay clean across all three workspaces. Test user deleted afterward; local stack stopped.
+
+## Deferred
+
+This is screen 3 of 18 in the Stitch project (sign-in, sign-up, forgot-password — the simplest, most self-contained screens, done first to prove the token/primitive foundation). Still ahead, in roughly the order the screens will matter:
+
+- **Onboarding** (3 steps in Stitch, vs. the current single-screen flow) — needs a real design decision on whether to split into steps now or keep it one screen with the new look.
+- **Home feed, Explore, Crew detail, Profile** — functionally complete; need a direct per-screen pass against their Stitch counterparts (card elevation tiers, feed row treatment, gamification chips) beyond what the primitive cascade already gave them.
+- **Direct Chat and Squad Group Chat** — Stitch generated both, but there is no messages/conversations table or backend anywhere in Phases 1–6. This is a new feature, not a reskin, and isn't in `docs/roadmap.md`. Flagged, not started.
+- **App icon and splash screen** — still the unmodified Expo starter logo and blue gradient. Stitch generates app *screens*, not an app icon/logomark asset, so this needs either a dedicated asset or a deliberate decision to typeset a wordmark instead.

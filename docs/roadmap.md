@@ -20,5 +20,5 @@ Each phase ships as its own set of commits. Design (Stitch) integration happens 
 
 ## Notes
 
-- Visual UI is intentionally minimal until Stitch design assets land; screens get real data and real navigation first, polish follows the design system.
+- Stitch design assets have landed ("Afro-Electric Neon Obsidian" — see `docs/design-system.md`) and visual integration is underway, screen by screen, alongside the phases above rather than as a phase of its own. Auth screens and the shared themed primitives are done; the rest of the 18-screen Stitch set is still ahead.
 - Each phase should leave `npm run typecheck` and `npm run lint` clean before moving to the next.
