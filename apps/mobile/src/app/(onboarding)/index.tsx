@@ -1,36 +1,44 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { completeOnboardingInputSchema, DEFAULT_CITY_SLUG, INTERESTS, LAUNCHED_CITIES, type CompleteOnboardingInput } from '@vybe/shared';
-import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { completeOnboardingInputSchema, type CompleteOnboardingInput } from '@vybe/shared';
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useCompleteOnboarding } from '@/features/profile/use-complete-onboarding';
 import { useProfile } from '@/features/profile/use-profile';
-import { useTheme } from '@/hooks/use-theme';
+import { StepGenres } from '@/features/onboarding/step-genres';
+import { StepNeighborhoods } from '@/features/onboarding/step-neighborhoods';
+import { StepPreferences } from '@/features/onboarding/step-preferences';
 import { getErrorMessage } from '@/lib/get-error-message';
 
-const defaultCity = LAUNCHED_CITIES.find((city) => city.slug === DEFAULT_CITY_SLUG) ?? LAUNCHED_CITIES[0];
+type Step = 1 | 2 | 3;
 
 export default function OnboardingScreen() {
   const { data: profile } = useProfile();
   const completeOnboarding = useCompleteOnboarding();
-  const theme = useTheme();
+  const [step, setStep] = useState<Step>(1);
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CompleteOnboardingInput>({
+  const form = useForm<CompleteOnboardingInput>({
     resolver: zodResolver(completeOnboardingInputSchema),
-    defaultValues: { username: '', display_name: '', city_id: '', interests: [] },
+    defaultValues: {
+      username: '',
+      display_name: '',
+      city_id: '',
+      interests: ['music', 'nightlife'],
+      genres: [],
+      neighborhoods: [],
+      travel_radius: 'central',
+      nightlife_pace: 'night_owl',
+      crew_preference: 'squad',
+      default_check_in_visibility: 'followers',
+    },
   });
+  const { handleSubmit, trigger, reset } = form;
 
   useEffect(() => {
     if (profile) {
@@ -38,10 +46,25 @@ export default function OnboardingScreen() {
         username: profile.username,
         display_name: profile.display_name ?? '',
         city_id: profile.city_id ?? '',
-        interests: [],
+        interests: ['music', 'nightlife'],
+        genres: [],
+        neighborhoods: [],
+        travel_radius: 'central',
+        nightlife_pace: 'night_owl',
+        crew_preference: 'squad',
+        default_check_in_visibility: 'followers',
       });
     }
-  }, [profile, reset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `reset` captured once per profile load is intentional here.
+  }, [profile]);
+
+  const goNext = async () => {
+    const fieldsForStep = step === 1 ? (['username', 'display_name', 'genres'] as const) : (['neighborhoods'] as const);
+    const valid = await trigger(fieldsForStep);
+    if (valid) setStep((current) => (current < 3 ? ((current + 1) as Step) : current));
+  };
+
+  const goBack = () => setStep((current) => (current > 1 ? ((current - 1) as Step) : current));
 
   const onSubmit = handleSubmit((values) => {
     completeOnboarding.mutate(values);
@@ -50,79 +73,39 @@ export default function OnboardingScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <ThemedText type="subtitle">Welcome to VYBE</ThemedText>
-          <ThemedText type="small">A few details before you dive in.</ThemedText>
+        <FormProvider {...form}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            {step === 1 && <StepGenres />}
+            {step === 2 && <StepNeighborhoods />}
+            {step === 3 && <StepPreferences />}
 
-          <ThemedView type="background" style={styles.field}>
-            <ThemedText type="smallBold">Username</ThemedText>
-            <Controller
-              control={control}
-              name="username"
-              render={({ field }) => (
-                <ThemedTextInput placeholder="username" value={field.value} onChangeText={field.onChange} />
+            {completeOnboarding.isError && (
+              <ThemedText type="small">{getErrorMessage(completeOnboarding.error)}</ThemedText>
+            )}
+
+            <ThemedView style={styles.actions}>
+              {step < 3 ? (
+                <ThemedButton
+                  title={step === 1 ? 'Lock in sound vibes' : 'Claim your neighborhoods'}
+                  onPress={goNext}
+                />
+              ) : (
+                <ThemedButton
+                  title="Complete setup & enter VYBE"
+                  onPress={onSubmit}
+                  loading={completeOnboarding.isPending}
+                />
               )}
-            />
-            {errors.username && <ThemedText type="small">{errors.username.message}</ThemedText>}
-          </ThemedView>
-
-          <ThemedView type="background" style={styles.field}>
-            <ThemedText type="smallBold">Display name</ThemedText>
-            <Controller
-              control={control}
-              name="display_name"
-              render={({ field }) => (
-                <ThemedTextInput placeholder="Your name" value={field.value} onChangeText={field.onChange} />
+              {step > 1 && (
+                <Pressable onPress={goBack} style={styles.backButton}>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Back
+                  </ThemedText>
+                </Pressable>
               )}
-            />
-            {errors.display_name && <ThemedText type="small">{errors.display_name.message}</ThemedText>}
-          </ThemedView>
-
-          <ThemedView type="background" style={styles.field}>
-            <ThemedText type="smallBold">City</ThemedText>
-            <ThemedText type="small">{defaultCity?.name} — more cities coming soon</ThemedText>
-          </ThemedView>
-
-          <ThemedView type="background" style={styles.field}>
-            <ThemedText type="smallBold">What are you into?</ThemedText>
-            <Controller
-              control={control}
-              name="interests"
-              render={({ field }) => (
-                <ThemedView type="background" style={styles.chipRow}>
-                  {INTERESTS.map((interest) => {
-                    const selected = field.value.includes(interest);
-                    return (
-                      <Pressable
-                        key={interest}
-                        onPress={() =>
-                          field.onChange(
-                            selected ? field.value.filter((value) => value !== interest) : [...field.value, interest],
-                          )
-                        }
-                        style={[
-                          styles.chip,
-                          {
-                            backgroundColor: selected ? theme.backgroundSelected : theme.backgroundElement,
-                            borderColor: theme.backgroundSelected,
-                          },
-                        ]}>
-                        <ThemedText type="small">{interest}</ThemedText>
-                      </Pressable>
-                    );
-                  })}
-                </ThemedView>
-              )}
-            />
-            {errors.interests && <ThemedText type="small">Pick at least one.</ThemedText>}
-          </ThemedView>
-
-          {completeOnboarding.isError && (
-            <ThemedText type="small">{getErrorMessage(completeOnboarding.error)}</ThemedText>
-          )}
-
-          <ThemedButton title="Let's go" onPress={onSubmit} loading={completeOnboarding.isPending} />
-        </ScrollView>
+            </ThemedView>
+          </ScrollView>
+        </FormProvider>
       </SafeAreaView>
     </ThemedView>
   );
@@ -134,18 +117,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.four,
-    gap: Spacing.three,
+    gap: Spacing.four,
   },
-  field: { gap: Spacing.two },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  chip: {
-    borderWidth: 1,
-    borderRadius: Spacing.four,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-  },
+  actions: { gap: Spacing.two, alignItems: 'center' },
+  backButton: { padding: Spacing.two },
 });

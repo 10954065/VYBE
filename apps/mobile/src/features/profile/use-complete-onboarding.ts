@@ -13,25 +13,20 @@ export function useCompleteOnboarding() {
       if (!userId) throw new Error("Not signed in.");
       const parsed = completeOnboardingInputSchema.parse(input);
 
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          username: parsed.username,
-          display_name: parsed.display_name,
-          city_id: parsed.city_id,
-          avatar_url: parsed.avatar_url,
-          onboarding_completed_at: new Date().toISOString(),
-        })
-        .eq("id", userId);
-      if (profileError) throw profileError;
-
-      const { error: clearInterestsError } = await supabase.from("user_interests").delete().eq("user_id", userId);
-      if (clearInterestsError) throw clearInterestsError;
-
-      const { error: interestsError } = await supabase
-        .from("user_interests")
-        .insert(parsed.interests.map((interest) => ({ user_id: userId, interest })));
-      if (interestsError) throw interestsError;
+      const { error } = await supabase.rpc("complete_onboarding", {
+        p_username: parsed.username,
+        p_display_name: parsed.display_name,
+        p_city_id: parsed.city_id,
+        p_avatar_url: (parsed.avatar_url ?? null) as string,
+        p_interests: parsed.interests,
+        p_genres: parsed.genres,
+        p_neighborhoods: parsed.neighborhoods,
+        p_travel_radius: parsed.travel_radius,
+        p_nightlife_pace: parsed.nightlife_pace,
+        p_crew_preference: parsed.crew_preference,
+        p_default_check_in_visibility: parsed.default_check_in_visibility,
+      });
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });
