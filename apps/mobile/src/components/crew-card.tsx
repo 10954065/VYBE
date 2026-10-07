@@ -1,0 +1,40 @@
+import type { Crew } from '@vybe/shared';
+import { Pressable, StyleSheet } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
+import { formatLabel } from '@/lib/format-label';
+
+interface CrewCardProps {
+  crew: Crew;
+  onPress: () => void;
+}
+
+export function CrewCard({ crew, onPress }: CrewCardProps) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`Open ${crew.name}`}>
+      <ThemedView type="backgroundElement" style={styles.card}>
+        <ThemedText type="smallBold">{crew.name}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {crew.privacy === 'private' ? 'Private' : 'Public'} · {crew.member_count}{' '}
+          {crew.member_count === 1 ? 'member' : 'members'}
+          {crew.category ? ` · ${formatLabel(crew.category)}` : ''}
+        </ThemedText>
+        {crew.description && (
+          <ThemedText type="small" numberOfLines={2}>
+            {crew.description}
+          </ThemedText>
+        )}
+      </ThemedView>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.one,
+  },
+});

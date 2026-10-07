@@ -19,11 +19,15 @@ export function useCreatePost() {
         kind: "text",
         body: parsed.body,
         visibility: parsed.visibility,
+        crew_id: parsed.crew_id,
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["home-feed", userId] });
+      if (input.crew_id) {
+        queryClient.invalidateQueries({ queryKey: ["crew-posts", input.crew_id] });
+      }
     },
   });
 }
