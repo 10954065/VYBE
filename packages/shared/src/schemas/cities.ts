@@ -10,8 +10,10 @@ export const citySchema = z.object({
   center_lat: z.number(),
   center_lng: z.number(),
   is_launched: z.boolean(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
+  // See packages/shared/src/schemas/profiles.ts for why coerce.date() and
+  // not z.iso.datetime() — Postgres's "+00:00" offset fails that regex.
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
 });
 
 export type CityRow = z.infer<typeof citySchema>;

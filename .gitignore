@@ -59,3 +59,4 @@ supabase/.temp/
 # Local agent/assistant tooling — never commit
 .claude/
 CLAUDE.md
+.playwright-mcp/

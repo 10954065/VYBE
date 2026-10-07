@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/ui": "~57.0.22",
+    "@hookform/resolvers": "^5.9.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.117.2",
     "@tanstack/react-query": "^5.104.1",
@@ -11,7 +12,6 @@
     "aes-js": "^3.1.2",
     "expo": "~57.0.27",
     "expo-constants": "~57.0.21",
-    "expo-device": "~57.0.2",
     "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.4",
     "expo-image": "~57.0.5",

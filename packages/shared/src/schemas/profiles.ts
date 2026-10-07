@@ -11,9 +11,13 @@ export const profileSchema = z.object({
   bio: z.string().nullable(),
   avatar_url: z.url().nullable(),
   city_id: z.uuid().nullable(),
-  onboarding_completed_at: z.iso.datetime().nullable(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
+  // z.coerce.date() (native Date parsing) rather than z.iso.datetime(): Postgres/
+  // PostgREST emits timestamps as "...+00:00", which z.iso.datetime()'s strict
+  // ISO-8601 regex rejects (it wants a literal "Z") — found by this field
+  // actually failing against a live query, not by inspection.
+  onboarding_completed_at: z.coerce.date().nullable(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
 });
 
 export type ProfileRow = z.infer<typeof profileSchema>;
