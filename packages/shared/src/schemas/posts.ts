@@ -31,10 +31,18 @@ export const feedPostSchema = z.object({
 });
 export type FeedPost = z.infer<typeof feedPostSchema>;
 
-export const createPostInputSchema = z.object({
-  body: z.string().trim().min(1, "Say something.").max(2000),
-  visibility: postVisibilitySchema.default("everyone"),
-});
+export const createPostInputSchema = z
+  .object({
+    body: z.string().trim().min(1, "Say something.").max(2000),
+    visibility: postVisibilitySchema.default("everyone"),
+    crew_id: z.uuid().optional(),
+  })
+  // Mirrors posts' own `crew_visibility_requires_crew` check constraint —
+  // fail fast client-side instead of round-tripping to hit it.
+  .refine((value) => value.visibility !== "crew" || !!value.crew_id, {
+    message: "A crew post needs a crew_id.",
+    path: ["crew_id"],
+  });
 export type CreatePostInput = z.infer<typeof createPostInputSchema>;
 
 export const commentSchema = z.object({

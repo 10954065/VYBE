@@ -14,3 +14,4 @@ export * from "./schemas/places";
 export * from "./schemas/vibes";
 export * from "./schemas/events";
 export * from "./schemas/check-ins";
+export * from "./schemas/crews";
