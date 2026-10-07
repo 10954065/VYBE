@@ -1,5 +1,12 @@
 import { z } from "zod";
+import { GENRES } from "../constants/genres";
 import { INTERESTS } from "../constants/interests";
+import { NEIGHBORHOODS, TRAVEL_RADII } from "../constants/neighborhoods";
+import {
+  CREW_PREFERENCES,
+  DEFAULT_CHECK_IN_VISIBILITIES,
+  NIGHTLIFE_PACES,
+} from "../constants/nightlife-preferences";
 
 /** Mirrors the `profiles` table. */
 export const profileSchema = z.object({
@@ -11,6 +18,10 @@ export const profileSchema = z.object({
   bio: z.string().nullable(),
   avatar_url: z.url().nullable(),
   city_id: z.uuid().nullable(),
+  travel_radius: z.enum(TRAVEL_RADII).nullable(),
+  nightlife_pace: z.enum(NIGHTLIFE_PACES).nullable(),
+  crew_preference: z.enum(CREW_PREFERENCES).nullable(),
+  default_check_in_visibility: z.enum(DEFAULT_CHECK_IN_VISIBILITIES),
   // z.coerce.date() (native Date parsing) rather than z.iso.datetime(): Postgres/
   // PostgREST emits timestamps as "...+00:00", which z.iso.datetime()'s strict
   // ISO-8601 regex rejects (it wants a literal "Z") — found by this field
@@ -22,7 +33,7 @@ export const profileSchema = z.object({
 
 export type ProfileRow = z.infer<typeof profileSchema>;
 
-/** Input for the onboarding completion step. */
+/** Input for the onboarding completion step — see docs/onboarding.md. */
 export const completeOnboardingInputSchema = z.object({
   username: z
     .string()
@@ -30,6 +41,12 @@ export const completeOnboardingInputSchema = z.object({
   display_name: z.string().min(1).max(60),
   city_id: z.uuid(),
   interests: z.array(z.enum(INTERESTS)).min(1).max(INTERESTS.length),
+  genres: z.array(z.enum(GENRES)).min(3, "Pick at least 3 genres."),
+  neighborhoods: z.array(z.enum(NEIGHBORHOODS)).min(1, "Pick at least 1 neighborhood."),
+  travel_radius: z.enum(TRAVEL_RADII),
+  nightlife_pace: z.enum(NIGHTLIFE_PACES),
+  crew_preference: z.enum(CREW_PREFERENCES),
+  default_check_in_visibility: z.enum(DEFAULT_CHECK_IN_VISIBILITIES),
   avatar_url: z.url().optional(),
 });
 

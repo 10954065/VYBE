@@ -1073,10 +1073,14 @@ export type Database = {
           bio: string | null;
           city_id: string | null;
           created_at: string;
+          crew_preference: string | null;
+          default_check_in_visibility: string;
           deleted_at: string | null;
           display_name: string | null;
           id: string;
+          nightlife_pace: string | null;
           onboarding_completed_at: string | null;
+          travel_radius: string | null;
           updated_at: string;
           username: string;
         };
@@ -1086,10 +1090,14 @@ export type Database = {
           bio?: string | null;
           city_id?: string | null;
           created_at?: string;
+          crew_preference?: string | null;
+          default_check_in_visibility?: string;
           deleted_at?: string | null;
           display_name?: string | null;
           id: string;
+          nightlife_pace?: string | null;
           onboarding_completed_at?: string | null;
+          travel_radius?: string | null;
           updated_at?: string;
           username: string;
         };
@@ -1098,10 +1106,14 @@ export type Database = {
           bio?: string | null;
           city_id?: string | null;
           created_at?: string;
+          crew_preference?: string | null;
+          default_check_in_visibility?: string;
           deleted_at?: string | null;
           display_name?: string | null;
           id?: string;
+          nightlife_pace?: string | null;
           onboarding_completed_at?: string | null;
+          travel_radius?: string | null;
           updated_at?: string;
           username?: string;
         };
@@ -1330,6 +1342,33 @@ export type Database = {
           },
         ];
       };
+      user_genres: {
+        Row: {
+          created_at: string;
+          genre: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          genre: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          genre?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_genres_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_interests: {
         Row: {
           created_at: string;
@@ -1350,6 +1389,33 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_interests_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_neighborhoods: {
+        Row: {
+          created_at: string;
+          neighborhood: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          neighborhood: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          neighborhood?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_neighborhoods_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -1481,6 +1547,22 @@ export type Database = {
       };
     };
     Functions: {
+      complete_onboarding: {
+        Args: {
+          p_avatar_url: string;
+          p_city_id: string;
+          p_crew_preference: string;
+          p_default_check_in_visibility: string;
+          p_display_name: string;
+          p_genres: string[];
+          p_interests: string[];
+          p_neighborhoods: string[];
+          p_nightlife_pace: string;
+          p_travel_radius: string;
+          p_username: string;
+        };
+        Returns: undefined;
+      };
       get_crew_privacy: { Args: { target_crew_id: string }; Returns: string };
       get_event_attendee_summary: {
         Args: { target_event_id: string };

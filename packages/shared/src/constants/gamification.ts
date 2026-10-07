@@ -12,6 +12,7 @@ export const XP_AWARDS = {
   join_crew: 15,
   explore_new_place: 20,
   meaningful_engagement_received: 2,
+  complete_onboarding: 100,
 } as const;
 
 export type XpAwardReason = keyof typeof XP_AWARDS;
