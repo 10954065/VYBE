@@ -20,6 +20,7 @@ gamification            -- xp_transactions, streaks, badges, user_badges, challe
 notifications           -- + notification_preferences
 moderation              -- reports, blocks
 analytics
+feed                    -- get_home_feed(), get_suggested_people() — RPCs, no new tables
 ```
 
 `crews`, `businesses` and `places` run before `posts`/`vibes`/`events` specifically so those tables' `crew_id`/`business_id`/`place_id` columns can be real foreign keys from the start — no deferred `ALTER TABLE ... ADD CONSTRAINT` once a dependency finally exists.
@@ -28,7 +29,7 @@ analytics
 
 - **No separate `crew_posts` table.** A crew post is just a row in `posts` with `crew_id` set and `visibility = 'crew'`. A second posts-shaped table for crew content would duplicate the post/comment/reaction logic that already exists — exactly the kind of duplication the project's own coding standards rule out. Documenting the call here per that same standard.
 - **No `users` table.** `auth.users` (Supabase Auth) is the identity table; `public.profiles` is the 1:1 public-facing row, created automatically by a trigger on signup (`handle_new_user()`).
-- **Event/check-in/vibe posts are not posts.** The feed is designed to aggregate across `posts`, `vibes`, `check_ins` and event highlights at the query layer (the planned `FeedRankingService`, Phase 4) rather than cramming every content type into one polymorphic table.
+- **Event/check-in/vibe posts are not posts.** The home feed built in Phase 4 (`get_home_feed`, see below) only surfaces `posts` so far; aggregating `vibes`/`check_ins`/event highlights into it is Phase 5+ work, done at the query layer rather than by cramming every content type into one polymorphic table.
 
 ## Conventions actually applied
 
@@ -42,6 +43,7 @@ analytics
 - **Current XP is derived, not stored**: `user_xp_totals` is a view summing `xp_transactions`, not a column that could drift from its ledger.
 - Precise `lat`/`lng` on `vibes`/`check_ins` is user location data and stays private by default (no public SELECT policy exposes it beyond the owner and whoever the visibility rules admit); `places` coordinates are intentionally public — they're business/venue listings, not personal location data.
 - Every profile-referencing (and crew-/business-referencing) foreign key has an explicit `ON DELETE` action — `cascade` or `set null`, deliberately chosen per table, never the Postgres default of blocking the delete. Verified by actually deleting a user wired into every table in the graph (see the `fix(db)` commit) rather than just reading the FK clauses.
+- **`get_home_feed`/`get_suggested_people` are plain SQL functions, not SECURITY DEFINER.** Both read `auth.uid()` internally rather than accepting a viewer id as a parameter (a client-supplied user id is never trusted, per `docs/architecture.md`), and both run as the calling role (the explicit, if default, `security invoker`) so the underlying `posts`/`profiles` RLS policies still apply on top of whatever these functions filter — a bug in either can only narrow what comes back, never widen it past what RLS already allows. Feed pagination is keyset-based (`(created_at, id) < (cursor_created_at, cursor_id)`), not `OFFSET`, so it stays correct while new posts are being inserted mid-scroll.
 
 ## Generated types
 
