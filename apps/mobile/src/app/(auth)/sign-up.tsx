@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpInputSchema, type SignUpInput } from '@vybe/shared';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedButton } from '@/components/themed-button';
@@ -31,48 +31,59 @@ export default function SignUpScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="title">VYBE</ThemedText>
-        <ThemedText type="subtitle">Create your account</ThemedText>
+        <View style={styles.header}>
+          <ThemedText type="title">VYBE</ThemedText>
+          <ThemedText type="subtitle">Join the Accra VYBE</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Vibes, crews, and live nights out — made for the city.
+          </ThemedText>
+        </View>
 
-        <ThemedView type="background" style={styles.field}>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Email"
-                keyboardType="email-address"
-                value={field.value}
-                onChangeText={field.onChange}
-              />
-            )}
+        <View style={styles.form}>
+          <View style={styles.field}>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                />
+              )}
+            />
+            {errors.email && <ThemedText type="small">{errors.email.message}</ThemedText>}
+          </View>
+
+          <View style={styles.field}>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Password (8+ characters)"
+                  secureTextEntry
+                  value={field.value}
+                  onChangeText={field.onChange}
+                />
+              )}
+            />
+            {errors.password && <ThemedText type="small">{errors.password.message}</ThemedText>}
+          </View>
+
+          {signUp.isSuccess && (
+            <ThemedText type="small">Check your email to confirm your account, then sign in.</ThemedText>
+          )}
+          {signUp.isError && <ThemedText type="small">{getErrorMessage(signUp.error)}</ThemedText>}
+
+          <ThemedButton title="Create account" onPress={onSubmit} loading={signUp.isPending} />
+          <ThemedButton
+            title="Already have an account? Sign in"
+            variant="ghost"
+            onPress={() => router.push('/(auth)/sign-in')}
           />
-          {errors.email && <ThemedText type="small">{errors.email.message}</ThemedText>}
-        </ThemedView>
-
-        <ThemedView type="background" style={styles.field}>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Password (8+ characters)"
-                secureTextEntry
-                value={field.value}
-                onChangeText={field.onChange}
-              />
-            )}
-          />
-          {errors.password && <ThemedText type="small">{errors.password.message}</ThemedText>}
-        </ThemedView>
-
-        {signUp.isSuccess && (
-          <ThemedText type="small">Check your email to confirm your account, then sign in.</ThemedText>
-        )}
-        {signUp.isError && <ThemedText type="small">{getErrorMessage(signUp.error)}</ThemedText>}
-
-        <ThemedButton title="Create account" onPress={onSubmit} loading={signUp.isPending} />
-        <ThemedButton title="Already have an account? Sign in" variant="ghost" onPress={() => router.push('/(auth)/sign-in')} />
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
@@ -84,7 +95,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
+    gap: Spacing.five,
   },
+  header: { gap: Spacing.one },
+  form: { gap: Spacing.three },
   field: { gap: Spacing.one },
 });

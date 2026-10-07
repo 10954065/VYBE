@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { requestPasswordResetInputSchema, type RequestPasswordResetInput } from '@vybe/shared';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedButton } from '@/components/themed-button';
@@ -31,30 +31,36 @@ export default function ForgotPasswordScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="subtitle">Reset your password</ThemedText>
-        <ThemedText type="small">We&apos;ll email you a link to reset it.</ThemedText>
+        <View style={styles.header}>
+          <ThemedText type="subtitle">Reset your password</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            We&apos;ll email you a link to reset it.
+          </ThemedText>
+        </View>
 
-        <ThemedView type="background" style={styles.field}>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <ThemedTextInput
-                placeholder="Email"
-                keyboardType="email-address"
-                value={field.value}
-                onChangeText={field.onChange}
-              />
-            )}
-          />
-          {errors.email && <ThemedText type="small">{errors.email.message}</ThemedText>}
-        </ThemedView>
+        <View style={styles.form}>
+          <View style={styles.field}>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <ThemedTextInput
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  value={field.value}
+                  onChangeText={field.onChange}
+                />
+              )}
+            />
+            {errors.email && <ThemedText type="small">{errors.email.message}</ThemedText>}
+          </View>
 
-        {requestReset.isSuccess && <ThemedText type="small">Check your email for a reset link.</ThemedText>}
-        {requestReset.isError && <ThemedText type="small">{getErrorMessage(requestReset.error)}</ThemedText>}
+          {requestReset.isSuccess && <ThemedText type="small">Check your email for a reset link.</ThemedText>}
+          {requestReset.isError && <ThemedText type="small">{getErrorMessage(requestReset.error)}</ThemedText>}
 
-        <ThemedButton title="Send reset link" onPress={onSubmit} loading={requestReset.isPending} />
-        <ThemedButton title="Back to sign in" variant="ghost" onPress={() => router.push('/(auth)/sign-in')} />
+          <ThemedButton title="Send reset link" onPress={onSubmit} loading={requestReset.isPending} />
+          <ThemedButton title="Back to sign in" variant="ghost" onPress={() => router.push('/(auth)/sign-in')} />
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
@@ -66,7 +72,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: Spacing.four,
-    gap: Spacing.three,
+    gap: Spacing.five,
   },
+  header: { gap: Spacing.one },
+  form: { gap: Spacing.three },
   field: { gap: Spacing.one },
 });
