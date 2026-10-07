@@ -1,4 +1,4 @@
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createSupabaseClient } from "@vybe/shared";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -16,8 +16,8 @@ export async function POST(request: Request) {
   }
 
   const anon = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "",
   );
   const { data: userData, error: userError } = await anon.auth.getUser(token);
   if (userError || !userData.user) {

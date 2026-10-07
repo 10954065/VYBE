@@ -4,5 +4,7 @@ export * from "./constants/vibes";
 export * from "./constants/gamification";
 export * from "./map/provider";
 export * from "./supabase";
+export type { Database } from "./database.types";
 export * from "./schemas/cities";
 export * from "./schemas/profiles";
+export * from "./schemas/auth";

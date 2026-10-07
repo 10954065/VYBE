@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createSupabaseClient } from "@vybe/shared";
 
 /**
  * Service-role client: bypasses RLS entirely. For trusted server-side
@@ -8,14 +8,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
  * build error, not just a code-review mistake.
  */
 export function createAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey = process.env.SUPABASE_SECRET_KEY;
-
-  if (!url || !secretKey) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY must be set.");
-  }
-
-  return createSupabaseClient(url, secretKey, {
+  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "", process.env.SUPABASE_SECRET_KEY ?? "", {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }
