@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
+import { Colors, Glow, Roundness, Spacing } from '@/constants/theme';
 import { ThemedText } from './themed-text';
 
 interface ThemedButtonProps {
@@ -27,7 +27,7 @@ export function ThemedButton({ title, onPress, loading, disabled, variant = 'pri
         pressed && !isDisabled && styles.pressed,
       ]}>
       {loading ? (
-        <ActivityIndicator color={variant === 'ghost' ? '#3c87f7' : '#ffffff'} />
+        <ActivityIndicator color={variant === 'ghost' ? Colors.primary : Colors.onPrimary} />
       ) : (
         <ThemedText type="smallBold" style={variant === 'ghost' ? styles.ghostLabel : styles.label}>
           {title}
@@ -39,16 +39,17 @@ export function ThemedButton({ title, onPress, loading, disabled, variant = 'pri
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: Spacing.two,
+    borderRadius: Roundness.pill,
     paddingVertical: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: 48,
   },
-  primary: { backgroundColor: '#3c87f7' },
-  danger: { backgroundColor: '#d64545' },
+  primary: { backgroundColor: Colors.primary, ...Glow.primary },
+  danger: { backgroundColor: Colors.dangerContainer },
   ghost: { backgroundColor: 'transparent' },
   disabled: { opacity: 0.5 },
-  pressed: { opacity: 0.8 },
-  label: { color: '#ffffff' },
-  ghostLabel: { color: '#3c87f7' },
+  pressed: { opacity: 0.85 },
+  label: { color: Colors.onPrimary },
+  ghostLabel: { color: Colors.primary },
 });

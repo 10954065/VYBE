@@ -1,6 +1,8 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * VYBE's design tokens — "Afro-Electric Neon Obsidian", generated in Stitch
+ * (see docs/design-system.md). The product is dark-only by design: there is
+ * no light-mode counterpart in the source design system, so `useTheme`
+ * always returns this one palette regardless of system color scheme.
  */
 
 import '@/global.css';
@@ -8,45 +10,43 @@ import '@/global.css';
 import { Platform } from 'react-native';
 
 export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+  background: '#090A0F',
+  backgroundElement: '#1A1D2B',
+  backgroundSelected: '#25293C',
+  hairline: 'rgba(255, 255, 255, 0.08)',
+
+  text: '#F8FAFC',
+  textSecondary: '#94A3B8',
+
+  primary: '#8B5CF6',
+  primaryStrong: '#7C3AED',
+  onPrimary: '#F8FAFC',
+
+  secondary: '#F97316',
+  secondaryStrong: '#EC4899',
+
+  tertiary: '#10B981',
+
+  danger: '#FFB4AB',
+  dangerContainer: '#93000A',
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors;
+
+export const FontFamily = {
+  regular: 'PlusJakartaSans_400Regular',
+  semibold: 'PlusJakartaSans_600SemiBold',
+  bold: 'PlusJakartaSans_700Bold',
+  extrabold: 'PlusJakartaSans_800ExtraBold',
+} as const;
 
 export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
+    sans: FontFamily.regular,
     mono: 'monospace',
   },
   web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
+    sans: FontFamily.regular,
     mono: 'var(--font-mono)',
   },
 });
@@ -61,5 +61,25 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+/** Pill radius for buttons, inputs, and chips — the design system's default. */
+export const Roundness = {
+  pill: 9999,
+  card: 24,
+  sheet: 32,
+} as const;
+
+/** Elevated-surface glow, per the design system's "Neon Aura" spec. */
+export const Glow = {
+  primary: {
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 8,
+  },
+} as const;
+
+// `web` covers the floating dock in app-tabs.web.tsx, which has no native
+// safe-area inset of its own — content must reserve space for it manually.
+export const BottomTabInset = Platform.select({ ios: 50, android: 80, web: 96 }) ?? 0;
 export const MaxContentWidth = 800;
