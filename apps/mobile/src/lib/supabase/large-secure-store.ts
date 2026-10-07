@@ -2,13 +2,20 @@ import "react-native-get-random-values";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import * as aesjs from "aes-js";
+import { Platform } from "react-native";
 
 /**
  * Supabase session storage adapter for Expo. Expo SecureStore caps values
- * at 2048 bytes — too small for a Supabase session blob — so the session
- * itself lives in AsyncStorage encrypted with AES-256, and only the
- * encryption key lives in SecureStore. Nothing sensitive ever touches
- * AsyncStorage in plaintext.
+ * at 2048 bytes — too small for a Supabase session blob — so on native the
+ * session lives in AsyncStorage encrypted with AES-256, and only the
+ * encryption key lives in SecureStore. Nothing sensitive touches
+ * AsyncStorage in plaintext on native.
+ *
+ * SecureStore has no web implementation at all (confirmed against Expo's
+ * own docs, which browser-test this file's wiring surfaced: a
+ * `deleteValueWithKeyAsync is not a function` crash) — there's no OS
+ * keychain to back it on web, so this falls back to plain localStorage
+ * there, matching Expo's own documented pattern for this exact situation.
  */
 export class LargeSecureStore {
   private async encrypt(key: string, value: string): Promise<string> {
@@ -32,6 +39,10 @@ export class LargeSecureStore {
   }
 
   async getItem(key: string): Promise<string | null> {
+    if (Platform.OS === "web") {
+      return localStorage.getItem(key);
+    }
+
     const encrypted = await AsyncStorage.getItem(key);
     if (!encrypted) {
       return null;
@@ -40,11 +51,21 @@ export class LargeSecureStore {
   }
 
   async setItem(key: string, value: string): Promise<void> {
+    if (Platform.OS === "web") {
+      localStorage.setItem(key, value);
+      return;
+    }
+
     const encrypted = await this.encrypt(key, value);
     await AsyncStorage.setItem(key, encrypted);
   }
 
   async removeItem(key: string): Promise<void> {
+    if (Platform.OS === "web") {
+      localStorage.removeItem(key);
+      return;
+    }
+
     await AsyncStorage.removeItem(key);
     await SecureStore.deleteItemAsync(key);
   }
