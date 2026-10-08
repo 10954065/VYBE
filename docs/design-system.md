@@ -24,10 +24,17 @@ Both were visible only once the floating web tab bar's chrome actually looked in
 
 Live browser, local stack: signed up a confirmed test user via the Admin API, completed onboarding server-side, walked sign-in → home → explore → profile, and screenshotted each. Confirmed the primitive-level reskin reached already-built screens without edits, confirmed both tab-bar fixes (profile reachable, delete-account button clear of the dock), and confirmed `npm run typecheck` / `npm run lint` stay clean across all three workspaces. Test user deleted afterward; local stack stopped.
 
+## Home, Discover, Crews, and Profile (second pass)
+
+Unlike the primitive-level cascade above, these four screens' Stitch designs assumed an entire retention/social layer that didn't exist yet — XP/levels/streaks/badges, friends, "outside now" presence, ratings, a leaderboard, real challenges. Rather than skin around invented numbers, that layer was built for real; see `docs/gamification.md` for the backend and the engine, and `docs/onboarding.md`'s sibling for how each screen's gap was triaged (ported faithfully where the data is now real, cut where Stitch's copy had no generalizable rule behind it — fabricated live counters, a "Featured Collective" hero with no curation criteria, an "I'm Going" place action redundant with real check-in).
+
+One IA change came out of this pass: every Stitch screen's bottom nav shows a dedicated Crews tab, not a segment inside Discover. The app now matches — Crews is its own tab (My Crews / Explore / City Board), and Discover dropped back to Places/Events.
+
 ## Deferred
 
-Sign-in/sign-up/forgot-password (this doc) and the 3-step onboarding flow (`docs/onboarding.md` — a real backend expansion, not just a reskin) are done. Still ahead, in roughly the order the screens will matter:
+Sign-in/sign-up/forgot-password (this doc) and the 3-step onboarding flow (`docs/onboarding.md`) are done. Home/Discover/Crews/Profile (`docs/gamification.md`) are done. Still ahead:
 
-- **Home feed, Explore, Crew detail, Profile** — functionally complete; need a direct per-screen pass against their Stitch counterparts (card elevation tiers, feed row treatment, gamification chips) beyond what the primitive cascade already gave them.
 - **Direct Chat and Squad Group Chat** — Stitch generated both, but there is no messages/conversations table or backend anywhere in Phases 1–6. This is a new feature, not a reskin, and isn't in `docs/roadmap.md`. Flagged, not started.
 - **App icon and splash screen** — still the unmodified Expo starter logo and blue gradient. Stitch generates app *screens*, not an app icon/logomark asset, so this needs either a dedicated asset or a deliberate decision to typeset a wordmark instead.
+- **Avatar upload** — needs Storage, not yet configured (flagged since Phase 3). Profile's new Edit screen covers every other editable field.
+- **Real ticket payments** — event `price_label` is deliberately display-only; see `docs/gamification.md`.
