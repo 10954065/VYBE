@@ -786,6 +786,7 @@ export type Database = {
       };
       notification_preferences: {
         Row: {
+          badges: boolean;
           challenges: boolean;
           comments: boolean;
           crew_activity: boolean;
@@ -797,9 +798,11 @@ export type Database = {
           streaks: boolean;
           updated_at: string;
           user_id: string;
+          xp_milestones: boolean;
         };
         ComputedFields: never;
         Insert: {
+          badges?: boolean;
           challenges?: boolean;
           comments?: boolean;
           crew_activity?: boolean;
@@ -811,8 +814,10 @@ export type Database = {
           streaks?: boolean;
           updated_at?: string;
           user_id: string;
+          xp_milestones?: boolean;
         };
         Update: {
+          badges?: boolean;
           challenges?: boolean;
           comments?: boolean;
           crew_activity?: boolean;
@@ -824,6 +829,7 @@ export type Database = {
           streaks?: boolean;
           updated_at?: string;
           user_id?: string;
+          xp_milestones?: boolean;
         };
         Relationships: [
           {
@@ -1172,6 +1178,42 @@ export type Database = {
             columns: ["city_id"];
             isOneToOne: false;
             referencedRelation: "cities";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      push_tokens: {
+        Row: {
+          created_at: string;
+          id: string;
+          platform: string;
+          token: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          platform: string;
+          token: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          platform?: string;
+          token?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -1650,6 +1692,17 @@ export type Database = {
         };
         Returns: undefined;
       };
+      create_notification: {
+        Args: {
+          p_actor_id: string;
+          p_body?: string;
+          p_target_id: string;
+          p_target_type: string;
+          p_type: string;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
       evaluate_badges: { Args: { p_user_id: string }; Returns: undefined };
       get_busiest_place_now: {
         Args: { p_city_id: string };
@@ -1842,6 +1895,12 @@ export type Database = {
         Returns: boolean;
       };
       is_outside_now: { Args: { p_user_id: string }; Returns: boolean };
+      level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      send_event_reminders: { Args: Record<PropertyKey, never>; Returns: undefined };
+      send_push_notification: {
+        Args: { p_body: string; p_data?: Json; p_title: string; p_user_id: string };
+        Returns: undefined;
+      };
       touch_outside_streak: {
         Args: { p_activity_date: string; p_user_id: string };
         Returns: undefined;

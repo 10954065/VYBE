@@ -1,6 +1,10 @@
 import { Stack } from 'expo-router';
 
+import { usePushRegistration } from '@/features/notifications/use-push-registration';
+
 export default function AppLayout() {
+  usePushRegistration();
+
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -10,6 +14,8 @@ export default function AppLayout() {
       <Stack.Screen name="event/create" options={{ title: 'New event' }} />
       <Stack.Screen name="crew/[id]" options={{ title: 'Crew' }} />
       <Stack.Screen name="crew/create" options={{ title: 'New crew' }} />
+      <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+      <Stack.Screen name="profile/notification-preferences" options={{ title: 'Notifications' }} />
     </Stack>
   );
 }

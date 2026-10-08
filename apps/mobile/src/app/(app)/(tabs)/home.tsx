@@ -24,6 +24,7 @@ import { OutsideNowStrip } from '@/features/home/outside-now-strip';
 import { useMyCrews } from '@/features/crews/use-my-crews';
 import { useMyOutsideStreak } from '@/features/gamification/use-my-streak';
 import { useMyXpTotal } from '@/features/gamification/use-my-xp-total';
+import { NotificationBell } from '@/features/notifications/notification-bell';
 import { useProfile } from '@/features/profile/use-profile';
 import { getErrorMessage } from '@/lib/get-error-message';
 
@@ -81,9 +82,12 @@ export default function HomeScreen() {
           ListHeaderComponent={
             <View style={styles.headerSection}>
               <View style={styles.heroSection}>
-                <ThemedText type="title">
-                  {greeting()}, {profile?.display_name ?? profile?.username} 👋
-                </ThemedText>
+                <View style={styles.heroRow}>
+                  <ThemedText type="title" style={styles.heroGreeting}>
+                    {greeting()}, {profile?.display_name ?? profile?.username} 👋
+                  </ThemedText>
+                  <NotificationBell />
+                </View>
                 {!!cityOutsideCount && (
                   <ThemedText type="small" themeColor="textSecondary">
                     Accra is buzzing tonight • <ThemedText themeColor="tertiary">{cityOutsideCount} people outside</ThemedText>
@@ -158,6 +162,8 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: Spacing.three },
   headerSection: { gap: Spacing.four, paddingBottom: Spacing.three, paddingTop: Spacing.two },
   heroSection: { gap: Spacing.one },
+  heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  heroGreeting: { flex: 1 },
   section: { gap: Spacing.two },
   composer: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   separator: { height: Spacing.two },
