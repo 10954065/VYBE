@@ -659,6 +659,7 @@ export type Database = {
           id: string;
           organizer_id: string;
           place_id: string | null;
+          price_label: string | null;
           slug: string;
           start_at: string;
           status: string;
@@ -681,6 +682,7 @@ export type Database = {
           id?: string;
           organizer_id: string;
           place_id?: string | null;
+          price_label?: string | null;
           slug: string;
           start_at: string;
           status?: string;
@@ -702,6 +704,7 @@ export type Database = {
           id?: string;
           organizer_id?: string;
           place_id?: string | null;
+          price_label?: string | null;
           slug?: string;
           start_at?: string;
           status?: string;
@@ -877,6 +880,52 @@ export type Database = {
           },
           {
             foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      place_ratings: {
+        Row: {
+          created_at: string;
+          id: string;
+          place_id: string;
+          rating: number;
+          review: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          place_id: string;
+          rating: number;
+          review?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          place_id?: string;
+          rating?: number;
+          review?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "place_ratings_place_id_fkey";
+            columns: ["place_id"];
+            isOneToOne: false;
+            referencedRelation: "places";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "place_ratings_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -1129,6 +1178,7 @@ export type Database = {
       };
       reactions: {
         Row: {
+          check_in_id: string | null;
           comment_id: string | null;
           created_at: string;
           id: string;
@@ -1138,6 +1188,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          check_in_id?: string | null;
           comment_id?: string | null;
           created_at?: string;
           id?: string;
@@ -1146,6 +1197,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          check_in_id?: string | null;
           comment_id?: string | null;
           created_at?: string;
           id?: string;
@@ -1154,6 +1206,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "reactions_check_in_id_fkey";
+            columns: ["check_in_id"];
+            isOneToOne: false;
+            referencedRelation: "check_ins";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "reactions_comment_id_fkey";
             columns: ["comment_id"];
@@ -1529,6 +1588,23 @@ export type Database = {
       };
     };
     Views: {
+      place_rating_aggregates: {
+        Row: {
+          avg_rating: number | null;
+          place_id: string | null;
+          rating_count: number | null;
+        };
+        ComputedFields: never;
+        Relationships: [
+          {
+            foreignKeyName: "place_ratings_place_id_fkey";
+            columns: ["place_id"];
+            isOneToOne: false;
+            referencedRelation: "places";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_xp_totals: {
         Row: {
           total_xp: number | null;
@@ -1547,6 +1623,17 @@ export type Database = {
       };
     };
     Functions: {
+      are_friends: { Args: { a: string; b: string }; Returns: boolean };
+      award_xp: {
+        Args: {
+          p_amount: number;
+          p_reason: string;
+          p_reference_id?: string;
+          p_reference_type?: string;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
       complete_onboarding: {
         Args: {
           p_avatar_url: string;
@@ -1563,6 +1650,31 @@ export type Database = {
         };
         Returns: undefined;
       };
+      evaluate_badges: { Args: { p_user_id: string }; Returns: undefined };
+      get_busiest_place_now: {
+        Args: { p_city_id: string };
+        Returns: {
+          check_in_count: number;
+          place_address: string;
+          place_id: string;
+          place_name: string;
+        }[];
+      };
+      get_city_leaderboard: {
+        Args: { p_city_id: string; result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          outside_streak_current: number;
+          rank: number;
+          total_xp: number;
+          user_id: string;
+          username: string;
+        }[];
+      };
+      get_city_outside_count: { Args: { p_city_id: string }; Returns: number };
+      get_crew_friends_inside_count: { Args: { p_crew_id: string }; Returns: number };
+      get_crew_outside_count: { Args: { p_crew_id: string }; Returns: number };
       get_crew_privacy: { Args: { target_crew_id: string }; Returns: string };
       get_event_attendee_summary: {
         Args: { target_event_id: string };
@@ -1594,6 +1706,57 @@ export type Database = {
           visibility: string;
         }[];
       };
+      get_home_highlight_events: {
+        Args: { p_city_id: string; result_limit?: number };
+        Returns: {
+          cover_image_url: string;
+          going_count: number;
+          id: string;
+          interested_count: number;
+          place_id: string;
+          place_name: string;
+          price_label: string;
+          slug: string;
+          start_at: string;
+          title: string;
+          viewer_status: string;
+        }[];
+      };
+      get_my_crews: {
+        Args: { result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          category: string;
+          cover_image_url: string;
+          friends_inside_count: number;
+          id: string;
+          member_count: number;
+          name: string;
+          outside_now_count: number;
+          slug: string;
+        }[];
+      };
+      get_people_outside_now: {
+        Args: { result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          is_friend: boolean;
+          last_check_in_at: string;
+          mutual_friend_count: number;
+          place_address: string;
+          place_name: string;
+          user_id: string;
+          username: string;
+        }[];
+      };
+      get_social_proof: {
+        Args: { target: string; viewer: string };
+        Returns: {
+          is_friend: boolean;
+          mutual_friend_count: number;
+        }[];
+      };
       get_suggested_people: {
         Args: { result_limit?: number };
         Returns: {
@@ -1612,6 +1775,11 @@ export type Database = {
       is_crew_member: {
         Args: { require_approved?: boolean; target_crew_id: string; viewer: string };
         Returns: boolean;
+      };
+      is_outside_now: { Args: { p_user_id: string }; Returns: boolean };
+      touch_outside_streak: {
+        Args: { p_activity_date: string; p_user_id: string };
+        Returns: undefined;
       };
     };
     Enums: {

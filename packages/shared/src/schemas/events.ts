@@ -19,6 +19,9 @@ export const eventSchema = z.object({
   capacity: z.number().int().nullable(),
   visibility: postVisibilitySchema,
   status: z.enum(["draft", "published", "cancelled", "completed"]),
+  // Display-only copy (e.g. "Free", "GH₵150") — never wired to real payment
+  // or ticketing. RSVP via event_attendees stays free regardless.
+  price_label: z.string().nullable(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });
@@ -39,6 +42,7 @@ export const createEventInputSchema = z.object({
   end_at: z.coerce.date().optional(),
   capacity: z.number().int().positive().optional(),
   visibility: postVisibilitySchema.default("everyone"),
+  price_label: z.string().trim().max(40).optional(),
 });
 export type CreateEventInput = z.infer<typeof createEventInputSchema>;
 
@@ -58,3 +62,21 @@ export const attendeeSummarySchema = z.object({
   viewer_status: attendeeStatusSchema.nullable(),
 });
 export type AttendeeSummary = z.infer<typeof attendeeSummarySchema>;
+
+// Shape returned by the `get_home_highlight_events` RPC ("Happening
+// Tonight") — events starting in the next 18 hours with attendee counts
+// already flattened in.
+export const homeHighlightEventSchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+  slug: z.string(),
+  cover_image_url: z.url().nullable(),
+  place_id: z.uuid().nullable(),
+  place_name: z.string().nullable(),
+  start_at: z.coerce.date(),
+  price_label: z.string().nullable(),
+  interested_count: z.coerce.number().int().nonnegative(),
+  going_count: z.coerce.number().int().nonnegative(),
+  viewer_status: attendeeStatusSchema.nullable(),
+});
+export type HomeHighlightEvent = z.infer<typeof homeHighlightEventSchema>;

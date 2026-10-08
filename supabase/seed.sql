@@ -12,16 +12,10 @@ values
   ('tamale', 'Tamale', 'GH', 'Africa/Accra', 9.4035, -0.8393, false)
 on conflict (slug) do nothing;
 
-insert into public.badges (slug, name, description, criteria)
-values
-  ('first_check_in', 'First Check-In', 'Checked in somewhere for the first time.', '{"check_ins": 1}'),
-  ('explorer', 'Explorer', 'Checked in at 10 different places.', '{"distinct_places": 10}'),
-  ('social_starter', 'Social Starter', 'Followed 10 other VYBErs.', '{"follows": 10}'),
-  ('weekend_warrior', 'Weekend Warrior', 'Checked in on 4 consecutive weekends.', '{"consecutive_weekends": 4}'),
-  ('crew_builder', 'Crew Builder', 'Created a crew with 10+ members.', '{"crew_member_count": 10}'),
-  ('event_regular', 'Event Regular', 'Attended 5 events.', '{"events_attended": 5}'),
-  ('early_vyber', 'Early VYBEr', 'Joined during the Accra launch.', '{"launch_city": "accra"}')
-on conflict (slug) do nothing;
+-- Badges are seeded by the 20261008000100_gamification_engine.sql migration
+-- instead of here: they're real production config evaluate_badges() looks
+-- up by slug, not dev-only sample data, so they need to exist in every
+-- environment, not just one that happens to run this file.
 
 do $$
 declare
@@ -45,10 +39,14 @@ begin
     ('Osu Oxford Street Shops', 'osu-oxford-street-shops', 'Boutique shopping strip.', 'shopping', 'Oxford Street, Osu', accra_id, 5.5550, -0.1810, 48)
   on conflict (slug) do nothing;
 
+  -- requirements keys match the progress-tracking engine in
+  -- 20261008000500_home_and_crews_hub.sql: visit_places -> distinct_places,
+  -- attend_event/join_crew -> count.
   insert into public.challenges (title, description, type, requirements, xp_reward, city_id, start_at, end_at, status)
   values
-    ('Explore Accra', 'Check in at 2 new places this week.', 'visit_places', '{"count": 2}', 20, accra_id, now(), now() + interval '7 days', 'active'),
+    ('Explore Accra', 'Check in at 2 new places this week.', 'visit_places', '{"distinct_places": 2}', 20, accra_id, now(), now() + interval '7 days', 'active'),
     ('Show Up', 'Attend one event this week.', 'attend_event', '{"count": 1}', 25, accra_id, now(), now() + interval '7 days', 'active'),
-    ('Find Your People', 'Join a crew.', 'join_crew', '{"count": 1}', 15, accra_id, now(), now() + interval '14 days', 'active')
+    ('Find Your People', 'Join a crew.', 'join_crew', '{"count": 1}', 15, accra_id, now(), now() + interval '14 days', 'active'),
+    ('48-Hour Accra Explorer Challenge', 'Visit 3 new places in Accra within 48 hours.', 'visit_places', '{"distinct_places": 3}', 500, accra_id, now(), now() + interval '48 hours', 'active')
   on conflict do nothing;
 end $$;
