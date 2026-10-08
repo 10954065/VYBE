@@ -24,6 +24,14 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="crews">
+        <NativeTabs.Trigger.Label>Crews</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'flame', selected: 'flame.fill' }}
+          md={{ default: 'local_fire_department', selected: 'local_fire_department' }}
+        />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

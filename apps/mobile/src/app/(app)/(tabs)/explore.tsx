@@ -1,16 +1,14 @@
-import type { Crew, EventWithStats, PlaceWithStats } from '@vybe/shared';
+import type { EventWithStats, PlaceWithStats } from '@vybe/shared';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { CrewCard } from '@/components/crew-card';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import { useCrews } from '@/features/crews/use-crews';
 import { HighlightEventCard } from '@/features/events/event-highlight-card';
 import { useEventsWithStats } from '@/features/events/use-events-with-stats';
 import { BusiestPlaceBanner } from '@/features/explore/busiest-place-banner';
@@ -24,7 +22,6 @@ import { getErrorMessage } from '@/lib/get-error-message';
 const SECTIONS = [
   { key: 'places', label: 'Places', createHref: null },
   { key: 'events', label: 'Events', createHref: '/event/create' },
-  { key: 'crews', label: 'Crews', createHref: '/crew/create' },
 ] as const;
 type Section = (typeof SECTIONS)[number]['key'];
 
@@ -53,7 +50,6 @@ export default function ExploreScreen() {
 
   const places = usePlaces();
   const events = useEventsWithStats();
-  const crews = useCrews();
   const busiestPlace = useBusiestPlace();
   const { data: deviceLocation } = useDeviceLocation();
 
@@ -79,27 +75,14 @@ export default function ExploreScreen() {
     return list;
   }, [events.data, search, eventFilter]);
 
-  const filteredCrews = useMemo(
-    () => (crews.data ?? []).filter((c) => c.name.toLowerCase().includes(search.toLowerCase())),
-    [crews.data, search],
-  );
-
   const active = SECTIONS.find((s) => s.key === section)!;
-  const activeQuery = section === 'places' ? places : section === 'events' ? events : crews;
-  const isEmpty =
-    (section === 'places' && filteredPlaces.length === 0) ||
-    (section === 'events' && filteredEvents.length === 0) ||
-    (section === 'crews' && filteredCrews.length === 0);
+  const activeQuery = section === 'places' ? places : events;
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.topBar}>
-          <ThemedTextInput
-            placeholder="Search places, events, or crews..."
-            value={search}
-            onChangeText={setSearch}
-          />
+          <ThemedTextInput placeholder="Search places or events..." value={search} onChangeText={setSearch} />
           <View style={styles.segmentRow}>
             {SECTIONS.map((s) => (
               <Pressable
@@ -147,7 +130,7 @@ export default function ExploreScreen() {
           </View>
         )}
 
-        {section === 'places' && (
+        {section === 'places' ? (
           <FlatList
             data={filteredPlaces}
             keyExtractor={(item: PlaceWithStats) => item.id}
@@ -156,8 +139,7 @@ export default function ExploreScreen() {
             ItemSeparatorComponent={() => <View style={styles.separator} />}
             ListEmptyComponent={<EmptyState query={activeQuery} fallback="No places in your city yet." />}
           />
-        )}
-        {section === 'events' && (
+        ) : (
           <FlatList
             data={filteredEvents}
             keyExtractor={(item: EventWithStats) => item.id}
@@ -167,19 +149,6 @@ export default function ExploreScreen() {
             ListEmptyComponent={<EmptyState query={activeQuery} fallback="No upcoming events yet — create one." />}
           />
         )}
-        {section === 'crews' && (
-          <FlatList
-            data={filteredCrews}
-            keyExtractor={(item: Crew) => item.id}
-            renderItem={({ item }) => (
-              <CrewCard crew={item} onPress={() => router.push({ pathname: '/(app)/crew/[id]', params: { id: item.id } })} />
-            )}
-            contentContainerStyle={[styles.listContent, { paddingBottom: BottomTabInset + Spacing.three }]}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListEmptyComponent={<EmptyState query={activeQuery} fallback="No crews in your city yet — start one." />}
-          />
-        )}
-        {!isEmpty && activeQuery.isLoading && <ActivityIndicator style={styles.emptyState} />}
       </SafeAreaView>
     </ThemedView>
   );

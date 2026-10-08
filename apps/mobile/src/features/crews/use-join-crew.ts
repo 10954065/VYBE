@@ -21,6 +21,8 @@ export function useJoinCrew() {
       queryClient.invalidateQueries({ queryKey: ["crew-membership", crewId, userId] });
       queryClient.invalidateQueries({ queryKey: ["crew", crewId] });
       queryClient.invalidateQueries({ queryKey: ["crew-members", crewId] });
+      queryClient.invalidateQueries({ queryKey: ["my-crews"] });
+      queryClient.invalidateQueries({ queryKey: ["crews"] });
     },
   });
 }

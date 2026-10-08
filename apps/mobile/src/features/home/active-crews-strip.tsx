@@ -7,20 +7,26 @@ import { Colors, Roundness, Spacing } from '@/constants/theme';
 
 interface ActiveCrewsStripProps {
   crews: MyCrew[];
+  limit?: number;
+  emptyHint?: string;
 }
 
-export function ActiveCrewsStrip({ crews }: ActiveCrewsStripProps) {
+export function ActiveCrewsStrip({
+  crews,
+  limit = 3,
+  emptyHint = "You haven't joined a crew yet — find one in the Crews tab.",
+}: ActiveCrewsStripProps) {
   if (crews.length === 0) {
     return (
       <ThemedText type="small" themeColor="textSecondary">
-        You haven&apos;t joined a crew yet — find one in the Crews tab.
+        {emptyHint}
       </ThemedText>
     );
   }
 
   return (
     <View style={styles.list}>
-      {crews.slice(0, 3).map((crew) => (
+      {crews.slice(0, limit).map((crew) => (
         <Pressable
           key={crew.id}
           onPress={() => router.push({ pathname: '/(app)/crew/[id]', params: { id: crew.id } })}
