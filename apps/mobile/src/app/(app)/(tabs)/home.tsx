@@ -18,7 +18,7 @@ import { ActiveCrewsStrip } from '@/features/home/active-crews-strip';
 import { useCityOutsideCount } from '@/features/home/use-city-outside-count';
 import { useHighlightEvents } from '@/features/home/use-highlight-events';
 import { usePeopleOutsideNow } from '@/features/home/use-people-outside-now';
-import { HighlightEventCard } from '@/features/home/highlight-event-card';
+import { HighlightEventCard } from '@/features/events/event-highlight-card';
 import { GamificationCard } from '@/features/home/gamification-card';
 import { OutsideNowStrip } from '@/features/home/outside-now-strip';
 import { useMyCrews } from '@/features/crews/use-my-crews';

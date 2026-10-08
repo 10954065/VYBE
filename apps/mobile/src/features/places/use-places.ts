@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { placeSchema, type Place } from "@vybe/shared";
+import { placeWithStatsSchema, type PlaceWithStats } from "@vybe/shared";
 
 import { useProfile } from "@/features/profile/use-profile";
 import { supabase } from "@/lib/supabase/client";
@@ -11,16 +11,13 @@ export function usePlaces() {
   return useQuery({
     queryKey: ["places", cityId],
     enabled: !!cityId,
-    queryFn: async (): Promise<Place[]> => {
-      const { data, error } = await supabase
-        .from("places")
-        .select("*")
-        .eq("city_id", cityId!)
-        .order("popularity_score", { ascending: false })
-        .order("name", { ascending: true })
-        .limit(50);
+    queryFn: async (): Promise<PlaceWithStats[]> => {
+      const { data, error } = await supabase.rpc("get_places_with_stats", {
+        p_city_id: cityId!,
+        result_limit: 50,
+      });
       if (error) throw error;
-      return (data ?? []).map((row) => placeSchema.parse(row));
+      return (data ?? []).map((row) => placeWithStatsSchema.parse(row));
     },
   });
 }

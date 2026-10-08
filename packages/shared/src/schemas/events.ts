@@ -80,3 +80,24 @@ export const homeHighlightEventSchema = z.object({
   viewer_status: attendeeStatusSchema.nullable(),
 });
 export type HomeHighlightEvent = z.infer<typeof homeHighlightEventSchema>;
+
+// Shape returned by the `get_events_with_stats` RPC — Discover's broader
+// upcoming-events list (vs. Home's next-18h highlight window), with the
+// same attendee-count flattening.
+export const eventWithStatsSchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+  slug: z.string(),
+  description: z.string().nullable(),
+  cover_image_url: z.url().nullable(),
+  category: z.string().nullable(),
+  place_id: z.uuid().nullable(),
+  place_name: z.string().nullable(),
+  start_at: z.coerce.date(),
+  end_at: z.coerce.date().nullable(),
+  price_label: z.string().nullable(),
+  interested_count: z.coerce.number().int().nonnegative(),
+  going_count: z.coerce.number().int().nonnegative(),
+  viewer_status: attendeeStatusSchema.nullable(),
+});
+export type EventWithStats = z.infer<typeof eventWithStatsSchema>;

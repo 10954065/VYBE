@@ -60,3 +60,12 @@ export const busiestPlaceSchema = z.object({
   check_in_count: z.coerce.number().int().nonnegative(),
 });
 export type BusiestPlace = z.infer<typeof busiestPlaceSchema>;
+
+// Shape returned by the `get_places_with_stats` RPC — places with real
+// rating aggregates and recent check-in counts flattened in.
+export const placeWithStatsSchema = placeSchema.extend({
+  avg_rating: z.coerce.number().nullable(),
+  rating_count: z.coerce.number().int().nonnegative(),
+  recent_check_in_count: z.coerce.number().int().nonnegative(),
+});
+export type PlaceWithStats = z.infer<typeof placeWithStatsSchema>;

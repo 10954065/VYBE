@@ -1,4 +1,4 @@
-import type { HomeHighlightEvent } from '@vybe/shared';
+import type { AttendeeStatus } from '@vybe/shared';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
@@ -7,8 +7,22 @@ import { ThemedText } from '@/components/themed-text';
 import { Colors, Roundness, Spacing } from '@/constants/theme';
 import { useRsvp } from '@/features/events/use-rsvp';
 
+// Structural subset shared by HomeHighlightEvent and EventWithStats — this
+// card doesn't care which RPC the event came from.
+export interface EventHighlightCardData {
+  id: string;
+  title: string;
+  cover_image_url: string | null;
+  place_name: string | null;
+  start_at: Date;
+  price_label: string | null;
+  interested_count: number;
+  going_count: number;
+  viewer_status: AttendeeStatus | null;
+}
+
 interface HighlightEventCardProps {
-  event: HomeHighlightEvent;
+  event: EventHighlightCardData;
 }
 
 function formatStartTime(startAt: Date): string {

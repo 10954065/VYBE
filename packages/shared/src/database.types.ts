@@ -1685,6 +1685,25 @@ export type Database = {
           viewer_status: string;
         }[];
       };
+      get_events_with_stats: {
+        Args: { p_city_id: string; result_limit?: number };
+        Returns: {
+          category: string;
+          cover_image_url: string;
+          description: string;
+          end_at: string;
+          going_count: number;
+          id: string;
+          interested_count: number;
+          place_id: string;
+          place_name: string;
+          price_label: string;
+          slug: string;
+          start_at: string;
+          title: string;
+          viewer_status: string;
+        }[];
+      };
       get_home_feed: {
         Args: { before_created_at?: string; before_id?: string; page_size?: number };
         Returns: {
@@ -1748,6 +1767,28 @@ export type Database = {
           place_name: string;
           user_id: string;
           username: string;
+        }[];
+      };
+      get_places_with_stats: {
+        Args: { p_city_id: string; result_limit?: number };
+        Returns: {
+          address: string;
+          avg_rating: number;
+          business_id: string;
+          category: string;
+          city_id: string;
+          cover_image_url: string;
+          created_at: string;
+          description: string;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+          popularity_score: number;
+          rating_count: number;
+          recent_check_in_count: number;
+          slug: string;
+          updated_at: string;
         }[];
       };
       get_social_proof: {
