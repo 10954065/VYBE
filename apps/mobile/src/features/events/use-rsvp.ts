@@ -24,6 +24,7 @@ export function useRsvp() {
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["event-attendee-summary", input.event_id] });
+      queryClient.invalidateQueries({ queryKey: ["home-highlight-events"] });
     },
   });
 }

@@ -35,6 +35,36 @@ export function levelForXp(totalXp: number): number {
   return level;
 }
 
+export interface LevelProgress {
+  level: number;
+  xpIntoLevel: number;
+  xpForLevel: number;
+  xpToNextLevel: number;
+  /** 0-1. 1 when at the highest defined level (no further threshold to progress toward). */
+  progressRatio: number;
+}
+
+/** Everything a "Lvl N, X XP to next level" progress bar needs, derived from total XP alone. */
+export function getLevelProgress(totalXp: number): LevelProgress {
+  const level = levelForXp(totalXp);
+  const floor = LEVEL_THRESHOLDS[level - 1] ?? 0;
+  const ceiling = LEVEL_THRESHOLDS[level];
+
+  if (ceiling === undefined) {
+    return { level, xpIntoLevel: totalXp - floor, xpForLevel: 0, xpToNextLevel: 0, progressRatio: 1 };
+  }
+
+  const xpForLevel = ceiling - floor;
+  const xpIntoLevel = totalXp - floor;
+  return {
+    level,
+    xpIntoLevel,
+    xpForLevel,
+    xpToNextLevel: ceiling - totalXp,
+    progressRatio: xpForLevel > 0 ? xpIntoLevel / xpForLevel : 1,
+  };
+}
+
 export const STREAK_TYPES = ["outside", "social", "explorer", "event"] as const;
 
 export type StreakType = (typeof STREAK_TYPES)[number];
