@@ -46,3 +46,19 @@ export const personOutsideNowSchema = z.object({
   last_check_in_at: z.coerce.date(),
 });
 export type PersonOutsideNow = z.infer<typeof personOutsideNowSchema>;
+
+// Shape returned by the `get_my_check_ins` RPC — the viewer's own
+// check-in timeline, with real reaction counts flattened in.
+export const myCheckInSchema = z.object({
+  id: z.uuid(),
+  place_id: z.uuid().nullable(),
+  place_name: z.string().nullable(),
+  event_id: z.uuid().nullable(),
+  event_title: z.string().nullable(),
+  note: z.string().nullable(),
+  visibility: postVisibilitySchema,
+  created_at: z.coerce.date(),
+  reaction_count: z.coerce.number().int().nonnegative(),
+  viewer_has_reacted: z.boolean(),
+});
+export type MyCheckIn = z.infer<typeof myCheckInSchema>;

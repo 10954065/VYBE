@@ -54,7 +54,16 @@ export type CompleteOnboardingInput = z.infer<typeof completeOnboardingInputSche
 
 /** Input for editing an existing profile. Every field optional (partial update). */
 export const updateProfileInputSchema = profileSchema
-  .pick({ display_name: true, bio: true, avatar_url: true, city_id: true })
+  .pick({
+    display_name: true,
+    bio: true,
+    avatar_url: true,
+    city_id: true,
+    travel_radius: true,
+    nightlife_pace: true,
+    crew_preference: true,
+    default_check_in_visibility: true,
+  })
   .partial();
 
 export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;

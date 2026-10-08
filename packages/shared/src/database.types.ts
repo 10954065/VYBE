@@ -1741,6 +1741,21 @@ export type Database = {
           viewer_status: string;
         }[];
       };
+      get_my_check_ins: {
+        Args: { result_limit?: number };
+        Returns: {
+          created_at: string;
+          event_id: string;
+          event_title: string;
+          id: string;
+          note: string;
+          place_id: string;
+          place_name: string;
+          reaction_count: number;
+          viewer_has_reacted: boolean;
+          visibility: string;
+        }[];
+      };
       get_my_crews: {
         Args: { result_limit?: number };
         Returns: {
@@ -1753,6 +1768,15 @@ export type Database = {
           name: string;
           outside_now_count: number;
           slug: string;
+        }[];
+      };
+      get_my_profile_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          crew_count: number;
+          distinct_events: number;
+          distinct_places: number;
+          longest_outside_streak: number;
         }[];
       };
       get_people_outside_now: {

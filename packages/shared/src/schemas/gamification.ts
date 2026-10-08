@@ -94,3 +94,12 @@ export const challengeWithParticipationSchema = challengeSchema.extend({
   joined_at: z.coerce.date().nullable(),
 });
 export type ChallengeWithParticipation = z.infer<typeof challengeWithParticipationSchema>;
+
+// Shape returned by the `get_my_profile_stats` RPC.
+export const myProfileStatsSchema = z.object({
+  distinct_events: z.coerce.number().int().nonnegative(),
+  distinct_places: z.coerce.number().int().nonnegative(),
+  longest_outside_streak: z.coerce.number().int().nonnegative(),
+  crew_count: z.coerce.number().int().nonnegative(),
+});
+export type MyProfileStats = z.infer<typeof myProfileStatsSchema>;

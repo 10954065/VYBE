@@ -1,4 +1,4 @@
-import { DEFAULT_CITY_SLUG, LAUNCHED_CITIES, type CompleteOnboardingInput, type TravelRadius } from '@vybe/shared';
+import { DEFAULT_CITY_SLUG, LAUNCHED_CITIES, type CompleteOnboardingInput } from '@vybe/shared';
 import { Controller, useFormContext } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 
@@ -9,12 +9,7 @@ import { NEIGHBORHOOD_CATALOG } from './neighborhood-catalog';
 import { NeighborhoodCard } from './neighborhood-card';
 import { OnboardingHeader } from './onboarding-header';
 import { OptionCard } from './option-card';
-
-const RADIUS_OPTIONS: { value: TravelRadius; emoji: string; title: string; subtitle: string }[] = [
-  { value: 'hood', emoji: '🚶', title: 'My hood only', subtitle: '< 3km from current zone' },
-  { value: 'central', emoji: '🚕', title: 'Across Central Accra', subtitle: '< 10km (Osu, Labone, Legon corridor)' },
-  { value: 'anywhere', emoji: '🚀', title: 'Anywhere with good energy', subtitle: 'All Greater Accra metro zone' },
-];
+import { RADIUS_OPTIONS } from './preference-options';
 
 const defaultCity = LAUNCHED_CITIES.find((city) => city.slug === DEFAULT_CITY_SLUG) ?? LAUNCHED_CITIES[0];
 
