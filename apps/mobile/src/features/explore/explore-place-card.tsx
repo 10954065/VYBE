@@ -5,12 +5,13 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Roundness, Spacing } from '@/constants/theme';
+import { SocialProofLine } from '@/features/discovery/social-proof-line';
 import { formatDistanceKm, haversineDistanceKm } from '@/lib/geo';
 import { formatLabel } from '@/lib/format-label';
 import type { DeviceLocation } from '@/features/places/use-device-location';
 
 interface ExplorePlaceCardProps {
-  place: PlaceWithStats;
+  place: PlaceWithStats & { friend_check_in_count?: number };
   deviceLocation: DeviceLocation | null | undefined;
 }
 
@@ -51,6 +52,8 @@ export function ExplorePlaceCard({ place, deviceLocation }: ExplorePlaceCardProp
             </View>
           )}
         </View>
+
+        <SocialProofLine friendCount={place.friend_check_in_count ?? 0} phrase="been here" />
 
         <View style={styles.footerRow}>
           {distanceKm != null ? (

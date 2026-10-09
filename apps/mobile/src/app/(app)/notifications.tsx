@@ -14,9 +14,10 @@ import { NotificationRow } from '@/features/notifications/notification-row';
 import { getErrorMessage } from '@/lib/get-error-message';
 
 // Only navigate when the target actually resolves to a real screen — this
-// project doesn't have a detail route for a lone comment, check-in, other
-// user's profile, badge, or challenge, so those notification types are
-// informational-only (mark as read, nothing to deep-link to).
+// project doesn't have a detail route for a lone comment, check-in, badge,
+// or challenge, so those notification types are informational-only (mark
+// as read, nothing to deep-link to). 'profile' now resolves for real,
+// since Phase 9 added the public profile view this always needed.
 function resolveNotificationHref(notification: Notification): { pathname: string; params: { id: string } } | null {
   if (!notification.target_id) return null;
 
@@ -27,6 +28,8 @@ function resolveNotificationHref(notification: Notification): { pathname: string
       return { pathname: '/(app)/crew/[id]', params: { id: notification.target_id } };
     case 'event':
       return { pathname: '/(app)/event/[id]', params: { id: notification.target_id } };
+    case 'profile':
+      return { pathname: '/(app)/profile/[id]', params: { id: notification.target_id } };
     default:
       return null;
   }

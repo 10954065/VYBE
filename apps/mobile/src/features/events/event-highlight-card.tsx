@@ -5,6 +5,7 @@ import { Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Roundness, Spacing } from '@/constants/theme';
+import { SocialProofLine } from '@/features/discovery/social-proof-line';
 import { useRsvp } from '@/features/events/use-rsvp';
 
 // Structural subset shared by HomeHighlightEvent and EventWithStats — this
@@ -19,6 +20,7 @@ export interface EventHighlightCardData {
   interested_count: number;
   going_count: number;
   viewer_status: AttendeeStatus | null;
+  friend_going_count?: number;
 }
 
 interface HighlightEventCardProps {
@@ -66,6 +68,8 @@ export function HighlightEventCard({ event }: HighlightEventCardProps) {
             👥 {event.going_count} going
           </ThemedText>
         </View>
+
+        <SocialProofLine friendCount={event.friend_going_count ?? 0} phrase="going" />
 
         <View style={styles.actions}>
           <Pressable

@@ -4,10 +4,11 @@ import { Pressable, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { SocialProofLine } from '@/features/discovery/social-proof-line';
 import { formatLabel } from '@/lib/format-label';
 
 interface CrewCardProps {
-  crew: Crew;
+  crew: Crew & { friend_member_count?: number };
   onPress: () => void;
 }
 
@@ -26,6 +27,7 @@ export function CrewCard({ crew, onPress }: CrewCardProps) {
             {crew.description}
           </ThemedText>
         )}
+        <SocialProofLine friendCount={crew.friend_member_count ?? 0} phrase="already in" />
       </ThemedView>
     </Pressable>
   );

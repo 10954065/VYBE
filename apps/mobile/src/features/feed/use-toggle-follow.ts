@@ -28,9 +28,13 @@ export function useToggleFollow() {
         if (error) throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["home-feed", userId] });
       queryClient.invalidateQueries({ queryKey: ["suggested-people", userId] });
+      queryClient.invalidateQueries({ queryKey: ["is-following", userId, variables.target_user_id] });
+      queryClient.invalidateQueries({ queryKey: ["social-proof", userId, variables.target_user_id] });
+      queryClient.invalidateQueries({ queryKey: ["profile-follow-counts", variables.target_user_id] });
+      queryClient.invalidateQueries({ queryKey: ["profile-follow-counts", userId] });
     },
   });
 }

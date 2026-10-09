@@ -12,6 +12,7 @@ import { BottomTabInset, Spacing } from '@/constants/theme';
 import { ActiveCrewsStrip } from '@/features/home/active-crews-strip';
 import { useMyCrews } from '@/features/crews/use-my-crews';
 import { useCrews } from '@/features/crews/use-crews';
+import { useRecommendedCrews } from '@/features/discovery/use-recommended-crews';
 import { useCityLeaderboard } from '@/features/crews/use-leaderboard';
 import { useActiveChallenge } from '@/features/crews/use-active-challenge';
 import { ChallengeBanner } from '@/features/crews/challenge-banner';
@@ -23,11 +24,19 @@ const SUB_TABS = ['my-crews', 'explore', 'leaderboard'] as const;
 type SubTab = (typeof SUB_TABS)[number];
 const SUB_TAB_LABELS: Record<SubTab, string> = { 'my-crews': 'My Crews', explore: 'Explore', leaderboard: 'City Board' };
 
+const CREW_EXPLORE_SORTS = ['all', 'for_you'] as const;
+type CrewExploreSort = (typeof CREW_EXPLORE_SORTS)[number];
+const CREW_EXPLORE_SORT_LABELS: Record<CrewExploreSort, string> = { all: 'All', for_you: 'For You' };
+
 export default function CrewsScreen() {
   const [tab, setTab] = useState<SubTab>('my-crews');
+  const [crewExploreSort, setCrewExploreSort] = useState<CrewExploreSort>('all');
   const { session } = useSession();
   const myCrews = useMyCrews();
+  const isCrewsForYou = tab === 'explore' && crewExploreSort === 'for_you';
   const allCrews = useCrews();
+  const recommendedCrews = useRecommendedCrews(isCrewsForYou);
+  const exploreCrews = isCrewsForYou ? recommendedCrews : allCrews;
   const leaderboard = useCityLeaderboard();
   const activeChallenge = useActiveChallenge();
 
@@ -64,27 +73,42 @@ export default function CrewsScreen() {
         )}
 
         {tab === 'explore' && (
-          <FlatList
-            data={allCrews.data ?? []}
-            keyExtractor={(item: Crew) => item.id}
-            renderItem={({ item }) => (
-              <CrewCard
-                crew={item}
-                onPress={() => router.push({ pathname: '/(app)/crew/[id]', params: { id: item.id } })}
-              />
-            )}
-            contentContainerStyle={[styles.listContent, { paddingBottom: BottomTabInset + Spacing.three }]}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListEmptyComponent={
-              allCrews.isLoading ? (
-                <ActivityIndicator style={styles.emptyState} />
-              ) : (
-                <ThemedText type="small" style={styles.emptyState}>
-                  {allCrews.isError ? getErrorMessage(allCrews.error) : 'No crews in your city yet — start one.'}
-                </ThemedText>
-              )
-            }
-          />
+          <>
+            <View style={styles.chipRow}>
+              {CREW_EXPLORE_SORTS.map((sort) => (
+                <Pressable key={sort} onPress={() => setCrewExploreSort(sort)}>
+                  <ThemedView type={crewExploreSort === sort ? 'backgroundSelected' : 'backgroundElement'} style={styles.chip}>
+                    <ThemedText type="small">{CREW_EXPLORE_SORT_LABELS[sort]}</ThemedText>
+                  </ThemedView>
+                </Pressable>
+              ))}
+            </View>
+            <FlatList
+              data={exploreCrews.data ?? []}
+              keyExtractor={(item: Crew) => item.id}
+              renderItem={({ item }) => (
+                <CrewCard
+                  crew={item}
+                  onPress={() => router.push({ pathname: '/(app)/crew/[id]', params: { id: item.id } })}
+                />
+              )}
+              contentContainerStyle={[styles.listContent, { paddingBottom: BottomTabInset + Spacing.three }]}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              ListEmptyComponent={
+                exploreCrews.isLoading ? (
+                  <ActivityIndicator style={styles.emptyState} />
+                ) : (
+                  <ThemedText type="small" style={styles.emptyState}>
+                    {exploreCrews.isError
+                      ? getErrorMessage(exploreCrews.error)
+                      : isCrewsForYou
+                        ? 'No recommendations yet — follow some friends first.'
+                        : 'No crews in your city yet — start one.'}
+                  </ThemedText>
+                )
+              }
+            />
+          </>
         )}
 
         {tab === 'leaderboard' && (
@@ -115,6 +139,8 @@ const styles = StyleSheet.create({
   subNav: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center', paddingHorizontal: Spacing.three, paddingVertical: Spacing.three },
   subNavButton: { flex: 1 },
   subNavPill: { borderRadius: Spacing.four, paddingVertical: Spacing.two, alignItems: 'center' },
+  chipRow: { flexDirection: 'row', gap: Spacing.two, paddingHorizontal: Spacing.three, paddingBottom: Spacing.two },
+  chip: { borderRadius: Spacing.four, paddingHorizontal: Spacing.two, paddingVertical: 6 },
   listContent: { paddingHorizontal: Spacing.three },
   section: { gap: Spacing.three },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

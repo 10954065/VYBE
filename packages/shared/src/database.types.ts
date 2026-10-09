@@ -1868,6 +1868,75 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      get_profile_follow_counts: {
+        Args: { p_profile_id: string };
+        Returns: {
+          follower_count: number;
+          following_count: number;
+        }[];
+      };
+      get_recommended_crews: {
+        Args: { result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          category: string;
+          city_id: string;
+          cover_image_url: string;
+          created_at: string;
+          creator_id: string;
+          description: string;
+          friend_member_count: number;
+          id: string;
+          member_count: number;
+          name: string;
+          privacy: string;
+          slug: string;
+          updated_at: string;
+        }[];
+      };
+      get_recommended_events: {
+        Args: { result_limit?: number };
+        Returns: {
+          category: string;
+          cover_image_url: string;
+          description: string;
+          end_at: string;
+          friend_going_count: number;
+          going_count: number;
+          id: string;
+          interested_count: number;
+          place_id: string;
+          place_name: string;
+          price_label: string;
+          slug: string;
+          start_at: string;
+          title: string;
+          viewer_status: string;
+        }[];
+      };
+      get_recommended_places: {
+        Args: { result_limit?: number };
+        Returns: {
+          address: string;
+          avg_rating: number;
+          business_id: string;
+          category: string;
+          city_id: string;
+          cover_image_url: string;
+          created_at: string;
+          description: string;
+          friend_check_in_count: number;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+          popularity_score: number;
+          rating_count: number;
+          recent_check_in_count: number;
+          slug: string;
+          updated_at: string;
+        }[];
+      };
       get_social_proof: {
         Args: { target: string; viewer: string };
         Returns: {
@@ -1896,11 +1965,55 @@ export type Database = {
       };
       is_outside_now: { Args: { p_user_id: string }; Returns: boolean };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      search_crews: {
+        Args: { p_query: string; result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          category: string;
+          id: string;
+          member_count: number;
+          name: string;
+          slug: string;
+        }[];
+      };
+      search_events: {
+        Args: { p_city_id: string; p_query: string; result_limit?: number };
+        Returns: {
+          cover_image_url: string;
+          id: string;
+          place_name: string;
+          slug: string;
+          start_at: string;
+          title: string;
+        }[];
+      };
+      search_people: {
+        Args: { p_query: string; result_limit?: number };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          id: string;
+          username: string;
+        }[];
+      };
+      search_places: {
+        Args: { p_city_id: string; p_query: string; result_limit?: number };
+        Returns: {
+          address: string;
+          category: string;
+          cover_image_url: string;
+          id: string;
+          name: string;
+          slug: string;
+        }[];
+      };
       send_event_reminders: { Args: Record<PropertyKey, never>; Returns: undefined };
       send_push_notification: {
         Args: { p_body: string; p_data?: Json; p_title: string; p_user_id: string };
         Returns: undefined;
       };
+      show_limit: { Args: Record<PropertyKey, never>; Returns: number };
+      show_trgm: { Args: { "": string }; Returns: string[] };
       touch_outside_streak: {
         Args: { p_activity_date: string; p_user_id: string };
         Returns: undefined;
