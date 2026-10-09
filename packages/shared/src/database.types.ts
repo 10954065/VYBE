@@ -1868,6 +1868,27 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      get_post_by_id: {
+        Args: { p_post_id: string };
+        Returns: {
+          author_avatar_url: string;
+          author_display_name: string;
+          author_id: string;
+          author_username: string;
+          body: string;
+          city_id: string;
+          comment_count: number;
+          created_at: string;
+          crew_id: string;
+          id: string;
+          kind: string;
+          poll_options: Json;
+          reaction_count: number;
+          updated_at: string;
+          viewer_has_reacted: boolean;
+          visibility: string;
+        }[];
+      };
       get_profile_follow_counts: {
         Args: { p_profile_id: string };
         Returns: {

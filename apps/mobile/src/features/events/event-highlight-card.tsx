@@ -1,12 +1,13 @@
 import type { AttendeeStatus } from '@vybe/shared';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { Pressable, Share, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Roundness, Spacing } from '@/constants/theme';
 import { SocialProofLine } from '@/features/discovery/social-proof-line';
 import { useRsvp } from '@/features/events/use-rsvp';
+import { useShareLink } from '@/lib/use-share-link';
 
 // Structural subset shared by HomeHighlightEvent and EventWithStats — this
 // card doesn't care which RPC the event came from.
@@ -36,7 +37,12 @@ function formatStartTime(startAt: Date): string {
 
 export function HighlightEventCard({ event }: HighlightEventCardProps) {
   const rsvp = useRsvp();
+  const shareLink = useShareLink();
   const isGoing = event.viewer_status === 'going' || event.viewer_status === 'checked_in';
+
+  const handleShare = () => {
+    shareLink('event', event.id, `${event.title} — ${formatStartTime(event.start_at)} at ${event.place_name ?? 'VYBE'}`);
+  };
 
   return (
     <Pressable
@@ -80,7 +86,7 @@ export function HighlightEventCard({ event }: HighlightEventCardProps) {
             </ThemedText>
           </Pressable>
           <Pressable
-            onPress={() => Share.share({ message: `${event.title} — ${formatStartTime(event.start_at)} at ${event.place_name ?? 'VYBE'}` })}
+            onPress={handleShare}
             style={({ pressed }) => [styles.shareButton, pressed && styles.pressed]}>
             <ThemedText type="smallBold">Share</ThemedText>
           </Pressable>

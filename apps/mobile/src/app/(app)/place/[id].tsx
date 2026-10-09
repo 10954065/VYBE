@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { EventCard } from '@/components/event-card';
+import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -20,6 +21,7 @@ import { useCreateVibe } from '@/features/vibes/use-create-vibe';
 import { formatLabel } from '@/lib/format-label';
 import { formatRelativeTime } from '@/lib/format-relative-time';
 import { getErrorMessage } from '@/lib/get-error-message';
+import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 import { useTheme } from '@/hooks/use-theme';
 
 const paramsSchema = z.object({ id: z.uuid() });
@@ -35,12 +37,12 @@ export default function PlaceDetailScreen() {
   const placeEvents = usePlaceEvents(placeId);
   const createCheckIn = useCreateCheckIn();
   const createVibe = useCreateVibe();
+  useRedirectIfInvalid(parsedParams.success, '/home');
 
   const [vibeType, setVibeType] = useState<VibeType>('chill');
   const [vibeText, setVibeText] = useState('');
 
   if (!parsedParams.success) {
-    router.replace('/home');
     return null;
   }
 
@@ -73,11 +75,14 @@ export default function PlaceDetailScreen() {
                 {place.data.address ? ` · ${place.data.address}` : ''}
               </ThemedText>
               {place.data.description && <ThemedText>{place.data.description}</ThemedText>}
-              <ThemedButton
-                title={`Check in${checkIns.data ? ` (${checkIns.data.length})` : ''}`}
-                onPress={handleCheckIn}
-                loading={createCheckIn.isPending}
-              />
+              <View style={styles.headerActions}>
+                <ThemedButton
+                  title={`Check in${checkIns.data ? ` (${checkIns.data.length})` : ''}`}
+                  onPress={handleCheckIn}
+                  loading={createCheckIn.isPending}
+                />
+                <ShareButton entity="place" id={placeId!} title={place.data.name} />
+              </View>
             </View>
           )}
 
@@ -156,6 +161,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   scrollContent: { padding: Spacing.three, gap: Spacing.five },
   header: { gap: Spacing.two },
+  headerActions: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   section: { gap: Spacing.two },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   chip: { borderWidth: 1, borderRadius: Spacing.four, paddingHorizontal: Spacing.three, paddingVertical: Spacing.two },

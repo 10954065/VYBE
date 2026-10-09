@@ -1,10 +1,11 @@
 import type { ProfileRow } from '@vybe/shared';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,6 +15,7 @@ import { useProfileById } from '@/features/discovery/use-profile-by-id';
 import { useProfileFollowCounts } from '@/features/discovery/use-profile-follow-counts';
 import { useSocialProof } from '@/features/discovery/use-social-proof';
 import { useToggleFollow } from '@/features/feed/use-toggle-follow';
+import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
 
@@ -21,9 +23,9 @@ export default function PublicProfileScreen() {
   const parsedParams = paramsSchema.safeParse(useLocalSearchParams());
   const profileId = parsedParams.success ? parsedParams.data.id : undefined;
   const profile = useProfileById(profileId);
+  useRedirectIfInvalid(parsedParams.success, '/home');
 
   if (!parsedParams.success) {
-    router.replace('/home');
     return null;
   }
 
@@ -92,12 +94,15 @@ function PublicProfileBody({ profileId, profile }: { profileId: string; profile:
             </ThemedText>
           )}
 
-          <ThemedButton
-            title={isFollowing.data ? 'Following' : 'Follow'}
-            variant={isFollowing.data ? 'ghost' : 'primary'}
-            loading={toggleFollow.isPending}
-            onPress={handleToggleFollow}
-          />
+          <View style={styles.actionsRow}>
+            <ThemedButton
+              title={isFollowing.data ? 'Following' : 'Follow'}
+              variant={isFollowing.data ? 'ghost' : 'primary'}
+              loading={toggleFollow.isPending}
+              onPress={handleToggleFollow}
+            />
+            <ShareButton entity="profile" id={profileId} title={profile.display_name ?? profile.username} />
+          </View>
         </View>
       </SafeAreaView>
     </ThemedView>
@@ -114,4 +119,5 @@ const styles = StyleSheet.create({
   bio: { textAlign: 'center' },
   countsRow: { flexDirection: 'row', gap: Spacing.five, marginTop: Spacing.two },
   countItem: { alignItems: 'center' },
+  actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
 });

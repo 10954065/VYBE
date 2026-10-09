@@ -1,8 +1,9 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,6 +15,7 @@ import { useCreateCheckIn } from '@/features/checkins/use-create-check-in';
 import { formatEventTime } from '@/lib/format-event-time';
 import { formatLabel } from '@/lib/format-label';
 import { getErrorMessage } from '@/lib/get-error-message';
+import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
 
@@ -25,9 +27,9 @@ export default function EventDetailScreen() {
   const summary = useAttendeeSummary(eventId);
   const rsvp = useRsvp();
   const checkIn = useCreateCheckIn();
+  useRedirectIfInvalid(parsedParams.success, '/home');
 
   if (!parsedParams.success) {
-    router.replace('/home');
     return null;
   }
 
@@ -60,6 +62,7 @@ export default function EventDetailScreen() {
               </ThemedText>
               {event.data.category && <ThemedText type="small">{formatLabel(event.data.category)}</ThemedText>}
               {event.data.description && <ThemedText>{event.data.description}</ThemedText>}
+              <ShareButton entity="event" id={eventId!} title={event.data.title} />
             </View>
           )}
 

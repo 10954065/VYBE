@@ -67,8 +67,9 @@ export function useToggleReaction() {
         queryClient.setQueryData<FeedCache>(queryKey, context.previous);
       }
     },
-    onSettled: () => {
+    onSettled: (_data, _error, input) => {
       queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["post", input.postId] });
     },
   });
 }

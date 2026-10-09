@@ -1,9 +1,10 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -22,6 +23,7 @@ import { useCreatePost } from '@/features/feed/use-create-post';
 import { formatLabel } from '@/lib/format-label';
 import { formatRelativeTime } from '@/lib/format-relative-time';
 import { getErrorMessage } from '@/lib/get-error-message';
+import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
 
@@ -41,11 +43,11 @@ export default function CrewDetailScreen() {
   const approveMember = useApproveMember();
   const removeMember = useRemoveMember();
   const createPost = useCreatePost();
+  useRedirectIfInvalid(parsedParams.success, '/explore');
 
   const [draft, setDraft] = useState('');
 
   if (!parsedParams.success) {
-    router.replace('/explore');
     return null;
   }
 
@@ -79,6 +81,8 @@ export default function CrewDetailScreen() {
                 {crew.data.category ? ` · ${formatLabel(crew.data.category)}` : ''}
               </ThemedText>
               {crew.data.description && <ThemedText>{crew.data.description}</ThemedText>}
+
+              <ShareButton entity="crew" id={crewId!} title={crew.data.name} />
 
               {!membership.data && (
                 <ThemedButton
