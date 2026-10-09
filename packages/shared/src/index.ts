@@ -22,3 +22,4 @@ export * from "./schemas/crews";
 export * from "./schemas/gamification";
 export * from "./schemas/notifications";
 export * from "./schemas/discovery";
+export * from "./schemas/moderation";

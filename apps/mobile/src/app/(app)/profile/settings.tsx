@@ -35,6 +35,7 @@ export default function SettingsScreen() {
 
         <View style={styles.actions}>
           <ThemedButton title="Notification preferences" variant="ghost" onPress={() => router.push('/profile/notification-preferences')} />
+          <ThemedButton title="Blocked users" variant="ghost" onPress={() => router.push('/profile/blocked-users')} />
           <ThemedButton title="Log out" variant="ghost" onPress={() => supabase.auth.signOut()} />
           <ThemedButton
             title="Delete account"

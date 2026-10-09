@@ -4,6 +4,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
@@ -83,6 +84,7 @@ export default function CrewDetailScreen() {
               {crew.data.description && <ThemedText>{crew.data.description}</ThemedText>}
 
               <ShareButton entity="crew" id={crewId!} title={crew.data.name} />
+              <ReportButton targetType="crew" targetId={crewId!} />
 
               {!membership.data && (
                 <ThemedButton

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { PostCard } from '@/components/post-card';
+import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
@@ -47,9 +48,12 @@ export default function PostDetailScreen() {
     <ThemedView type="backgroundElement" style={styles.comment}>
       <ThemedText type="smallBold">{item.author_display_name ?? item.author_username}</ThemedText>
       <ThemedText>{item.body}</ThemedText>
-      <ThemedText type="small" themeColor="textSecondary">
-        {formatRelativeTime(item.created_at)}
-      </ThemedText>
+      <View style={styles.commentFooter}>
+        <ThemedText type="small" themeColor="textSecondary">
+          {formatRelativeTime(item.created_at)}
+        </ThemedText>
+        <ReportButton targetType="comment" targetId={item.id} />
+      </View>
     </ThemedView>
   );
 
@@ -73,7 +77,10 @@ export default function PostDetailScreen() {
           }
           onPressComments={() => {}}
         />
-        <ShareButton entity="post" id={postId!} title={post.data.body ?? 'a post on VYBE'} />
+        <View style={styles.postActionsRow}>
+          <ShareButton entity="post" id={postId!} title={post.data.body ?? 'a post on VYBE'} />
+          <ReportButton targetType="post" targetId={postId!} />
+        </View>
       </View>
     );
   };
@@ -121,8 +128,10 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   listContent: { padding: Spacing.three, flexGrow: 1 },
   postHeader: { gap: Spacing.two, marginBottom: Spacing.three },
+  postActionsRow: { flexDirection: 'row', gap: Spacing.three, alignItems: 'center' },
   postLoading: { paddingVertical: Spacing.four, textAlign: 'center' },
   comment: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
+  commentFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   separator: { height: Spacing.two },
   emptyState: { paddingVertical: Spacing.five, textAlign: 'center' },
   composerRow: { gap: Spacing.one, paddingHorizontal: Spacing.three, paddingBottom: Spacing.three },

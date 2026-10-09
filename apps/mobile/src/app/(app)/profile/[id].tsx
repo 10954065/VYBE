@@ -1,10 +1,11 @@
 import type { ProfileRow } from '@vybe/shared';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
@@ -15,6 +16,9 @@ import { useProfileById } from '@/features/discovery/use-profile-by-id';
 import { useProfileFollowCounts } from '@/features/discovery/use-profile-follow-counts';
 import { useSocialProof } from '@/features/discovery/use-social-proof';
 import { useToggleFollow } from '@/features/feed/use-toggle-follow';
+import { useIsBlocked } from '@/features/moderation/use-is-blocked';
+import { useToggleBlock } from '@/features/moderation/use-toggle-block';
+import { confirmDestructive } from '@/lib/confirm';
 import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
@@ -46,10 +50,27 @@ function PublicProfileBody({ profileId, profile }: { profileId: string; profile:
   const followCounts = useProfileFollowCounts(profileId);
   const socialProof = useSocialProof(profileId);
   const isFollowing = useIsFollowing(profileId);
+  const isBlocked = useIsBlocked(profileId);
   const toggleFollow = useToggleFollow();
+  const toggleBlock = useToggleBlock();
 
   const handleToggleFollow = () => {
     toggleFollow.mutate({ target_user_id: profileId, is_following: !!isFollowing.data });
+  };
+
+  const name = profile.display_name ?? profile.username;
+
+  const handleToggleBlock = () => {
+    if (isBlocked.data) {
+      toggleBlock.mutate({ target_user_id: profileId, is_blocked: true });
+      return;
+    }
+    confirmDestructive(
+      `Block ${name}?`,
+      "They won't be able to see your content or follow you, and you won't see theirs.",
+      'Block',
+      () => toggleBlock.mutate({ target_user_id: profileId, is_blocked: false }),
+    );
   };
 
   return (
@@ -94,15 +115,39 @@ function PublicProfileBody({ profileId, profile }: { profileId: string; profile:
             </ThemedText>
           )}
 
-          <View style={styles.actionsRow}>
-            <ThemedButton
-              title={isFollowing.data ? 'Following' : 'Follow'}
-              variant={isFollowing.data ? 'ghost' : 'primary'}
-              loading={toggleFollow.isPending}
-              onPress={handleToggleFollow}
-            />
-            <ShareButton entity="profile" id={profileId} title={profile.display_name ?? profile.username} />
-          </View>
+          {isBlocked.data ? (
+            <View style={styles.actionsRow}>
+              <ThemedButton
+                title="Unblock"
+                variant="ghost"
+                loading={toggleBlock.isPending}
+                onPress={handleToggleBlock}
+              />
+            </View>
+          ) : (
+            <>
+              <View style={styles.actionsRow}>
+                <ThemedButton
+                  title={isFollowing.data ? 'Following' : 'Follow'}
+                  variant={isFollowing.data ? 'ghost' : 'primary'}
+                  loading={toggleFollow.isPending}
+                  onPress={handleToggleFollow}
+                />
+                <ShareButton entity="profile" id={profileId} title={name} />
+              </View>
+              <View style={styles.secondaryActionsRow}>
+                <ReportButton targetType="user" targetId={profileId} label="Report" />
+                <ThemedText type="small" themeColor="textSecondary">
+                  ·
+                </ThemedText>
+                <Pressable onPress={handleToggleBlock} accessibilityRole="button" accessibilityLabel="Block">
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Block
+                  </ThemedText>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
       </SafeAreaView>
     </ThemedView>
@@ -120,4 +165,5 @@ const styles = StyleSheet.create({
   countsRow: { flexDirection: 'row', gap: Spacing.five, marginTop: Spacing.two },
   countItem: { alignItems: 'center' },
   actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
+  secondaryActionsRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center', marginTop: Spacing.one },
 });

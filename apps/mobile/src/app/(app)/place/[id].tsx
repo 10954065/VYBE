@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
 import { EventCard } from '@/components/event-card';
+import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
@@ -83,6 +84,7 @@ export default function PlaceDetailScreen() {
                 />
                 <ShareButton entity="place" id={placeId!} title={place.data.name} />
               </View>
+              <ReportButton targetType="place" targetId={placeId!} />
             </View>
           )}
 

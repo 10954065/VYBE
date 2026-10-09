@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
@@ -63,6 +64,7 @@ export default function EventDetailScreen() {
               {event.data.category && <ThemedText type="small">{formatLabel(event.data.category)}</ThemedText>}
               {event.data.description && <ThemedText>{event.data.description}</ThemedText>}
               <ShareButton entity="event" id={eventId!} title={event.data.title} />
+              <ReportButton targetType="event" targetId={eventId!} />
             </View>
           )}
 

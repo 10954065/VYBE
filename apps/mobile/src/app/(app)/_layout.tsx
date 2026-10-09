@@ -16,6 +16,7 @@ export default function AppLayout() {
       <Stack.Screen name="crew/create" options={{ title: 'New crew' }} />
       <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
       <Stack.Screen name="profile/notification-preferences" options={{ title: 'Notifications' }} />
+      <Stack.Screen name="profile/blocked-users" options={{ title: 'Blocked users' }} />
       <Stack.Screen name="profile/[id]" options={{ title: 'Profile' }} />
     </Stack>
   );

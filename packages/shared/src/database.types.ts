@@ -1665,6 +1665,7 @@ export type Database = {
       };
     };
     Functions: {
+      are_blocked: { Args: { a: string; b: string }; Returns: boolean };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       award_xp: {
         Args: {
@@ -1792,6 +1793,16 @@ export type Database = {
           start_at: string;
           title: string;
           viewer_status: string;
+        }[];
+      };
+      get_my_blocks: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_url: string;
+          blocked_at: string;
+          display_name: string;
+          id: string;
+          username: string;
         }[];
       };
       get_my_check_ins: {
