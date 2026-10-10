@@ -1135,6 +1135,8 @@ export type Database = {
           id: string;
           nightlife_pace: string | null;
           onboarding_completed_at: string | null;
+          suspended_at: string | null;
+          suspended_reason: string | null;
           travel_radius: string | null;
           updated_at: string;
           username: string;
@@ -1152,6 +1154,8 @@ export type Database = {
           id: string;
           nightlife_pace?: string | null;
           onboarding_completed_at?: string | null;
+          suspended_at?: string | null;
+          suspended_reason?: string | null;
           travel_radius?: string | null;
           updated_at?: string;
           username: string;
@@ -1168,6 +1172,8 @@ export type Database = {
           id?: string;
           nightlife_pace?: string | null;
           onboarding_completed_at?: string | null;
+          suspended_at?: string | null;
+          suspended_reason?: string | null;
           travel_radius?: string | null;
           updated_at?: string;
           username?: string;

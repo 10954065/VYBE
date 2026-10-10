@@ -10,6 +10,7 @@ import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { SuspendedScreen } from '@/components/suspended-screen';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/use-profile';
@@ -38,6 +39,10 @@ function RootNavigator() {
 
   if (isSessionLoading || (isSignedIn && isProfileLoading)) {
     return <ThemedView style={{ flex: 1 }} />;
+  }
+
+  if (isSignedIn && profile?.suspended_at) {
+    return <SuspendedScreen reason={profile.suspended_reason} />;
   }
 
   const needsOnboarding = isSignedIn && !profile?.onboarding_completed_at;

@@ -27,6 +27,8 @@ export const profileSchema = z.object({
   // ISO-8601 regex rejects (it wants a literal "Z") — found by this field
   // actually failing against a live query, not by inspection.
   onboarding_completed_at: z.coerce.date().nullable(),
+  suspended_at: z.coerce.date().nullable(),
+  suspended_reason: z.string().nullable(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 });
