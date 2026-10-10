@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import type { FeedPost } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -36,6 +37,7 @@ export function useToggleReaction() {
           .from("reactions")
           .insert({ user_id: userId, post_id: postId, reaction_type: REACTION_TYPE });
         if (error) throw error;
+        track("reaction_added", { target: "post" });
       }
     },
     onMutate: async ({ postId, isReacted }: ToggleReactionInput) => {

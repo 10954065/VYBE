@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { getAdminStatus } from "@/lib/auth/admin";
 import { SignOutButton } from "../sign-out-button";
+
+export const metadata: Metadata = { title: "Not authorized" };
 
 // Signed in, but not on the admin allowlist. A separate page rather than a
 // redirect back to login: signing in again as the same person wouldn't

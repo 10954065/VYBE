@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 
+import { track } from './analytics/analytics';
 import { buildShareLink, type ShareableEntity } from './share-link';
 
 export type ShareOutcome = 'shared' | 'copied' | 'cancelled';
@@ -14,13 +15,18 @@ export type ShareOutcome = 'shared' | 'copied' | 'cancelled';
 // the link so sharing still does something useful everywhere.
 export function useShareLink() {
   return useCallback(async (entity: ShareableEntity, id: string, title: string): Promise<ShareOutcome> => {
-    const url = buildShareLink(entity, id);
-    try {
-      const result = await Share.share({ message: `${title}\n${url}`, url, title });
-      return result.action === Share.dismissedAction ? 'cancelled' : 'shared';
-    } catch {
-      await Clipboard.setStringAsync(url);
-      return 'copied';
-    }
+    const outcome = await shareOrCopy(buildShareLink(entity, id), title);
+    track('content_shared', { entity, outcome });
+    return outcome;
   }, []);
+}
+
+async function shareOrCopy(url: string, title: string): Promise<ShareOutcome> {
+  try {
+    const result = await Share.share({ message: `${title}\n${url}`, url, title });
+    return result.action === Share.dismissedAction ? 'cancelled' : 'shared';
+  } catch {
+    await Clipboard.setStringAsync(url);
+    return 'copied';
+  }
 }

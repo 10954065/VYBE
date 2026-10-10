@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPostInputSchema, type CreatePostInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -22,6 +23,7 @@ export function useCreatePost() {
         crew_id: parsed.crew_id,
       });
       if (error) throw error;
+      track("post_created", { visibility: parsed.visibility, in_crew: !!parsed.crew_id });
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["home-feed", userId] });

@@ -6,9 +6,10 @@ import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { AnalyticsToggle } from '@/features/analytics/analytics-toggle';
 import { useDeleteAccount } from '@/features/profile/use-delete-account';
 import { getErrorMessage } from '@/lib/get-error-message';
-import { supabase } from '@/lib/supabase/client';
+import { signOut } from '@/lib/auth/sign-out';
 
 export default function SettingsScreen() {
   const deleteAccount = useDeleteAccount();
@@ -33,10 +34,12 @@ export default function SettingsScreen() {
         <ThemedButton title="Back" variant="ghost" onPress={() => router.back()} />
         <ThemedText type="title">Settings</ThemedText>
 
+        <AnalyticsToggle />
+
         <View style={styles.actions}>
           <ThemedButton title="Notification preferences" variant="ghost" onPress={() => router.push('/profile/notification-preferences')} />
           <ThemedButton title="Blocked users" variant="ghost" onPress={() => router.push('/profile/blocked-users')} />
-          <ThemedButton title="Log out" variant="ghost" onPress={() => supabase.auth.signOut()} />
+          <ThemedButton title="Log out" variant="ghost" onPress={() => void signOut()} />
           <ThemedButton
             title="Delete account"
             variant="danger"

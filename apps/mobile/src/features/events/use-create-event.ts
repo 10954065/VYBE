@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createEventInputSchema, type CreateEventInput } from "@vybe/shared";
 
 import { useProfile } from "@/features/profile/use-profile";
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/lib/supabase/client";
@@ -31,6 +32,7 @@ export function useCreateEvent() {
         visibility: parsed.visibility,
       });
       if (error) throw error;
+      track("event_created", { category: parsed.category ?? "other" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events", profile?.city_id] });

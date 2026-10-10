@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { getAdminStatus } from "@/lib/auth/admin";
 import { LoginForm } from "./login-form";
+
+export const metadata: Metadata = { title: "Sign in" };
 
 // An already-signed-in admin skips the form. Reads the session, so it sits
 // behind the Suspense boundary below rather than at the page's top level.

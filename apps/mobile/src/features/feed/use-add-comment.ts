@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCommentInputSchema, type CreateCommentInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -21,6 +22,7 @@ export function useAddComment() {
         body: parsed.body,
       });
       if (error) throw error;
+      track("comment_added", { is_reply: !!parsed.parent_comment_id });
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["comments", input.post_id] });

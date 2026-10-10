@@ -1711,6 +1711,7 @@ export type Database = {
         Returns: undefined;
       };
       evaluate_badges: { Args: { p_user_id: string }; Returns: undefined };
+      get_analytics_overview: { Args: { p_days: number }; Returns: Json };
       get_busiest_place_now: {
         Args: { p_city_id: string };
         Returns: {

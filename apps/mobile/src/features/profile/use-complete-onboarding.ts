@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { completeOnboardingInputSchema, type CompleteOnboardingInput } from "@vybe/shared";
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -27,6 +28,7 @@ export function useCompleteOnboarding() {
         p_default_check_in_visibility: parsed.default_check_in_visibility,
       });
       if (error) throw error;
+      track("onboarding_completed", { genre_count: parsed.genres.length, neighborhood_count: parsed.neighborhoods.length });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", userId] });

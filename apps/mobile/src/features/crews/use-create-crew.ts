@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createCrewInputSchema, type CreateCrewInput } from "@vybe/shared";
 
 import { useProfile } from "@/features/profile/use-profile";
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { slugify } from "@/lib/slugify";
 import { supabase } from "@/lib/supabase/client";
@@ -31,6 +32,7 @@ export function useCreateCrew() {
         .select("id")
         .single();
       if (error) throw error;
+      track("crew_created", { privacy: parsed.privacy });
       return data.id;
     },
     onSuccess: () => {

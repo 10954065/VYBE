@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { signOut } from "@/lib/auth/sign-out";
 import { supabase } from "@/lib/supabase/client";
 
 /**
@@ -22,7 +23,7 @@ export function useDeleteAccount() {
         throw new Error("Failed to delete account. Please try again.");
       }
 
-      await supabase.auth.signOut();
+      await signOut();
     },
   });
 }

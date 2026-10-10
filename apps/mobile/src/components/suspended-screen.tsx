@@ -5,7 +5,7 @@ import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { supabase } from '@/lib/supabase/client';
+import { signOut } from '@/lib/auth/sign-out';
 
 interface SuspendedScreenProps {
   reason: string | null;
@@ -27,7 +27,7 @@ export function SuspendedScreen({ reason }: SuspendedScreenProps) {
             </ThemedView>
           )}
         </View>
-        <ThemedButton title="Log out" variant="ghost" onPress={() => supabase.auth.signOut()} />
+        <ThemedButton title="Log out" variant="ghost" onPress={() => void signOut()} />
       </SafeAreaView>
     </ThemedView>
   );

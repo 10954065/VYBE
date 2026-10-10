@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { REPORT_STATUSES } from "@vybe/shared";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -5,6 +6,8 @@ import { Suspense } from "react";
 import { formatLabel } from "@/lib/format";
 import { getReports, parseStatusFilter } from "./queries";
 import { ReportCard } from "./report-card";
+
+export const metadata: Metadata = { title: "Reports" };
 
 const FILTERS = [...REPORT_STATUSES, "all"] as const;
 

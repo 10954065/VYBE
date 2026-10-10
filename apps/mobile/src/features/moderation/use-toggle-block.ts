@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -29,6 +30,7 @@ export function useToggleBlock() {
           .from("blocks")
           .insert({ blocker_id: userId, blocked_id: target_user_id });
         if (error) throw error;
+        track("user_blocked");
       }
     },
     // Blocking (not just unblocking) can also silently remove a mutual

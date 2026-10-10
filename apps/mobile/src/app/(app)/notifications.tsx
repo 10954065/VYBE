@@ -11,6 +11,7 @@ import { useMarkAllNotificationsRead } from '@/features/notifications/use-mark-a
 import { useMarkNotificationRead } from '@/features/notifications/use-mark-notification-read';
 import { useNotifications } from '@/features/notifications/use-notifications';
 import { NotificationRow } from '@/features/notifications/notification-row';
+import { track } from '@/lib/analytics/analytics';
 import { getErrorMessage } from '@/lib/get-error-message';
 
 // Only navigate when the target actually resolves to a real screen — this
@@ -45,6 +46,7 @@ export default function NotificationsScreen() {
 
   const handlePress = (notification: Notification) => {
     if (!notification.read_at) markRead.mutate(notification.id);
+    track('notification_opened', { type: notification.type });
 
     const href = resolveNotificationHref(notification);
     if (href) router.push(href as never);

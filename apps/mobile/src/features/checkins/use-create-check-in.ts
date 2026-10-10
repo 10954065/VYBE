@@ -6,6 +6,7 @@ import {
   type CreateCheckInInput,
 } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -32,6 +33,7 @@ export function useCreateCheckIn() {
         }
         throw error;
       }
+      track("check_in_created", { at_event: !!parsed.event_id });
     },
     onSuccess: (_data, input) => {
       if (input.place_id) {

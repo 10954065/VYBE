@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { formatDateTime } from "@/lib/format";
 import { suspendUser, unsuspendUser } from "../actions";
 import { ConfirmSubmitButton } from "../confirm-submit-button";
 import { normalizeUsernameQuery, searchUsers, type AdminUser } from "./queries";
+
+export const metadata: Metadata = { title: "Users" };
 
 const BUTTON = "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
 

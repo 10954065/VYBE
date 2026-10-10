@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createReportInputSchema, type CreateReportInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -21,6 +22,7 @@ export function useCreateReport() {
         details: parsed.details,
       });
       if (error) throw error;
+      track("report_submitted", { target_type: parsed.target_type, category: parsed.category });
     },
   });
 }

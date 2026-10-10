@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createVibeInputSchema, type CreateVibeInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -22,6 +23,7 @@ export function useCreateVibe() {
         visibility: parsed.visibility,
       });
       if (error) throw error;
+      track("vibe_shared", { vibe_type: parsed.vibe_type });
     },
     onSuccess: (_data, input) => {
       if (input.place_id) {

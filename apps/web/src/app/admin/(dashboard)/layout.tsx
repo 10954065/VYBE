@@ -7,6 +7,7 @@ import { SignOutButton } from "../sign-out-button";
 const NAV_LINKS = [
   { href: "/admin/reports", label: "Reports" },
   { href: "/admin/users", label: "Users" },
+  { href: "/admin/analytics", label: "Analytics" },
 ] as const;
 
 async function AccountMenu() {

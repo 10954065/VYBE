@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -32,6 +33,7 @@ export function useToggleCheckInReaction() {
           .from("reactions")
           .insert({ user_id: userId, check_in_id: checkInId, reaction_type: REACTION_TYPE });
         if (error) throw error;
+        track("reaction_added", { target: "check_in" });
       }
     },
     onSuccess: () => {

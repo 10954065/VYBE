@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { rsvpInputSchema, type RsvpInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -21,6 +22,7 @@ export function useRsvp() {
           { onConflict: "event_id,user_id" },
         );
       if (error) throw error;
+      track("event_rsvp", { status: parsed.status });
     },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["event-attendee-summary", input.event_id] });

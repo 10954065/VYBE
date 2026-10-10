@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -16,6 +17,7 @@ export function useJoinCrew() {
       // of what's inserted here.
       const { error } = await supabase.from("crew_members").insert({ crew_id: crewId, user_id: userId });
       if (error) throw error;
+      track("crew_joined");
     },
     onSuccess: (_data, crewId) => {
       queryClient.invalidateQueries({ queryKey: ["crew-membership", crewId, userId] });

@@ -14,6 +14,7 @@ import { SuspendedScreen } from '@/components/suspended-screen';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/use-profile';
+import { useAnalyticsLifecycle } from '@/lib/analytics/use-analytics-lifecycle';
 import { SessionProvider, useSession } from '@/lib/auth/session-provider';
 import { queryClient } from '@/lib/query/client';
 
@@ -36,8 +37,15 @@ function RootNavigator() {
   const { session, isLoading: isSessionLoading } = useSession();
   const isSignedIn = !!session;
   const { data: profile, isLoading: isProfileLoading } = useProfile();
+  const isLoading = isSessionLoading || (isSignedIn && isProfileLoading);
 
-  if (isSessionLoading || (isSignedIn && isProfileLoading)) {
+  useAnalyticsLifecycle({
+    userId: session?.user.id ?? null,
+    cityId: profile?.city_id ?? null,
+    isReady: !isLoading,
+  });
+
+  if (isLoading) {
     return <ThemedView style={{ flex: 1 }} />;
   }
 

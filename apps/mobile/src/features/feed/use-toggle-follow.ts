@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toggleFollowInputSchema, type ToggleFollowInput } from "@vybe/shared";
 
+import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
 import { supabase } from "@/lib/supabase/client";
 
@@ -26,6 +27,7 @@ export function useToggleFollow() {
           .from("follows")
           .insert({ follower_id: userId, following_id: parsed.target_user_id });
         if (error) throw error;
+        track("user_followed");
       }
     },
     onSuccess: (_data, variables) => {

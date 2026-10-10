@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { BottomTabInset, Spacing } from '@/constants/theme';
+import { track } from '@/lib/analytics/analytics';
 import { formatLabel } from '@/lib/format-label';
 import { useSearchCrews } from '@/features/discovery/use-search-crews';
 import { useSearchEvents } from '@/features/discovery/use-search-events';
@@ -22,6 +24,15 @@ export function SearchResults({ query }: SearchResultsProps) {
 
   const isLoading = people.isLoading || places.isLoading || events.isLoading || crews.isLoading;
   const totalResults = (people.data?.length ?? 0) + (places.data?.length ?? 0) + (events.data?.length ?? 0) + (crews.data?.length ?? 0);
+
+  // One event per settled (already debounced) query, once its results are in.
+  // Only the query's length is recorded, never its text.
+  const lastTrackedQuery = useRef<string | null>(null);
+  useEffect(() => {
+    if (isLoading || !query || lastTrackedQuery.current === query) return;
+    lastTrackedQuery.current = query;
+    track('search_performed', { query_length: Math.min(query.length, 200), result_count: totalResults });
+  }, [isLoading, query, totalResults]);
 
   return (
     <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.three }]}>
