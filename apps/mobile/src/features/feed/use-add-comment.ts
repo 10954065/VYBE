@@ -27,6 +27,9 @@ export function useAddComment() {
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ["comments", input.post_id] });
       queryClient.invalidateQueries({ queryKey: ["home-feed", userId] });
+      // Every other place the post's comment count is shown.
+      queryClient.invalidateQueries({ queryKey: ["post", input.post_id] });
+      queryClient.invalidateQueries({ queryKey: ["crew-posts"] });
     },
   });
 }

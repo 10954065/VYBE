@@ -1,6 +1,6 @@
 import type { Comment } from '@vybe/shared';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
@@ -8,12 +8,11 @@ import { z } from 'zod';
 import { PostCard } from '@/components/post-card';
 import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
-import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useAddComment } from '@/features/feed/use-add-comment';
+import { CommentComposer } from '@/features/feed/comment-composer';
 import { useComments } from '@/features/feed/use-comments';
 import { usePost } from '@/features/feed/use-post';
 import { useToggleReaction } from '@/features/feed/use-toggle-reaction';
@@ -22,6 +21,9 @@ import { getErrorMessage } from '@/lib/get-error-message';
 import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
+
+// How long to keep the list pinned to its end after a sent comment appears.
+const FOLLOW_NEW_COMMENT_MS = 1000;
 
 export default function PostDetailScreen() {
   const parsedParams = paramsSchema.safeParse(useLocalSearchParams());
@@ -32,7 +34,23 @@ export default function PostDetailScreen() {
   const addComment = useAddComment();
   const toggleReaction = useToggleReaction();
   const [draft, setDraft] = useState('');
+  const listRef = useRef<FlatList<Comment>>(null);
+  // After sending: wait for the refetched list to include the new comment,
+  // then follow the end of the list while it lays out (comments are
+  // appended, and the list can grow over a few layout passes).
+  const scrollToNewComment = useRef<'idle' | 'awaiting-data' | 'following'>('idle');
+  const commentCount = comments.data?.length ?? 0;
+  const listHeight = useRef(0);
   useRedirectIfInvalid(parsedParams.success, '/home');
+
+  useEffect(() => {
+    if (scrollToNewComment.current !== 'awaiting-data') return;
+    scrollToNewComment.current = 'following';
+    const timer = setTimeout(() => {
+      scrollToNewComment.current = 'idle';
+    }, FOLLOW_NEW_COMMENT_MS);
+    return () => clearTimeout(timer);
+  }, [commentCount]);
 
   if (!parsedParams.success) {
     return null;
@@ -40,8 +58,23 @@ export default function PostDetailScreen() {
 
   const handleSend = () => {
     const body = draft.trim();
-    if (!body) return;
-    addComment.mutate({ post_id: postId!, body }, { onSuccess: () => setDraft('') });
+    if (!body || addComment.isPending) return;
+    addComment.mutate(
+      { post_id: postId!, body },
+      {
+        onSuccess: () => {
+          setDraft('');
+          scrollToNewComment.current = 'awaiting-data';
+        },
+      },
+    );
+  };
+
+  // Scrolls by the real reported sizes rather than scrollToEnd, which uses
+  // FlatList's estimate of not-yet-measured rows and stops short.
+  const handleListContentSizeChange = (_width: number, contentHeight: number) => {
+    if (scrollToNewComment.current !== 'following') return;
+    listRef.current?.scrollToOffset({ offset: Math.max(contentHeight - listHeight.current, 0), animated: true });
   };
 
   const renderItem = ({ item }: { item: Comment }) => (
@@ -89,6 +122,11 @@ export default function PostDetailScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <FlatList
+          ref={listRef}
+          onContentSizeChange={handleListContentSizeChange}
+          onLayout={(event) => {
+            listHeight.current = event.nativeEvent.layout.height;
+          }}
           data={comments.data ?? []}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -106,18 +144,13 @@ export default function PostDetailScreen() {
           }
         />
 
-        <View style={styles.composerRow}>
-          <ThemedView type="backgroundElement" style={styles.composer}>
-            <ThemedTextInput
-              placeholder="Add a comment…"
-              value={draft}
-              onChangeText={setDraft}
-              style={styles.input}
-            />
-            <ThemedButton title="Send" onPress={handleSend} loading={addComment.isPending} disabled={!draft.trim()} />
-          </ThemedView>
-          {addComment.isError && <ThemedText type="small">{getErrorMessage(addComment.error)}</ThemedText>}
-        </View>
+        <CommentComposer
+          value={draft}
+          onChangeText={setDraft}
+          onSend={handleSend}
+          isSending={addComment.isPending}
+          errorMessage={addComment.isError ? getErrorMessage(addComment.error) : undefined}
+        />
       </SafeAreaView>
     </ThemedView>
   );
@@ -134,7 +167,4 @@ const styles = StyleSheet.create({
   commentFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   separator: { height: Spacing.two },
   emptyState: { paddingVertical: Spacing.five, textAlign: 'center' },
-  composerRow: { gap: Spacing.one, paddingHorizontal: Spacing.three, paddingBottom: Spacing.three },
-  composer: { flexDirection: 'row', gap: Spacing.two, padding: Spacing.three, alignItems: 'center' },
-  input: { flex: 1 },
 });

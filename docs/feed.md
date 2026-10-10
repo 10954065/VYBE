@@ -39,6 +39,15 @@ This is the same shape already used successfully at the root `_layout.tsx` for `
 
 **Cosmetic, harmless leftover**: the pushed screen's web header renders an auto-generated back link with `href="/explore"` in the accessibility tree, regardless of which tab you actually came from. Clicking it still correctly pops the stack back to wherever you came from (verified: came from `/home`, landed back on `/home` with all state — reaction/comment counts, the new post — intact) because the click handler does a real stack pop, not a literal navigation to that href. Not worth chasing further; it's a display-only artifact of the experimental native-tabs integration, same category as the already-documented web limitation.
 
+## Comment composer
+
+`features/feed/comment-composer.tsx` replaced the original input-plus-"Send"-button row, where the pill button had no horizontal padding and the label was crushed into a narrow capsule. It's now one rounded field holding the input and a round arrow send button (violet with the primary glow when there's text, muted when empty, a spinner while sending), with the field's border turning violet on focus. The input grows with its content up to a few lines, then scrolls; on web that needs explicit sizing from `onContentSizeChange` (textareas don't auto-grow, default to two rows, and never report a shrinking height, so an emptied input snaps back to one line explicitly). The bar rides up with the keyboard via Reanimated's `useAnimatedKeyboard` — before this the iOS keyboard covered it.
+
+Two real bugs fixed alongside it:
+
+- **Stale comment count on the post screen.** `use-add-comment` invalidated the comments list and the home feed but not `['post', id]` (added in Phase 10) or crew feeds, so the post above the comments kept its old count. Now invalidates all three.
+- **Sent comments landed off-screen.** After sending, the list now follows its end until the new comment is in view. `scrollToEnd` alone stopped short — it relies on FlatList's estimate for rows it hasn't measured yet — so it scrolls by the real reported content height minus the list's height instead.
+
 ## Verified end-to-end (local stack, real browser)
 
 Signed in as a seeded dev user with 25 staggered test posts across 3 followed accounts: feed pagination (first page caps at 20, scrolling loads the rest via the keyset cursor), creating a post (appears at the top immediately), toggling a reaction (optimistic update, persisted, survives reload), viewing and adding a comment (count syncs back into the feed), and following a suggested person (removes them from the suggestion strip, confirmed via a direct `201 Created` on `/rest/v1/follows`).
