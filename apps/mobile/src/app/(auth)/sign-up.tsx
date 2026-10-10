@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BrandMark } from '@/components/brand-mark';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
@@ -32,6 +33,7 @@ export default function SignUpScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
+          <BrandMark />
           <ThemedText type="title">VYBE</ThemedText>
           <ThemedText type="subtitle">Join the Accra VYBE</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">

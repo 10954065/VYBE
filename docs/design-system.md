@@ -30,11 +30,19 @@ Unlike the primitive-level cascade above, these four screens' Stitch designs ass
 
 One IA change came out of this pass: every Stitch screen's bottom nav shows a dedicated Crews tab, not a segment inside Discover. The app now matches — Crews is its own tab (My Crews / Explore / City Board), and Discover dropped back to Places/Events.
 
+## App icon, splash, and name
+
+Stitch generates screens, not a logomark, so the brand mark was designed directly from the design system's tokens: a neon **V** (violet → pink → orange, the `primary` → `secondaryStrong` → `secondary` ramp) that doubles as a figure with raised arms, with a glowing orange head — someone out, vibing. It sits on the obsidian `background` with a soft violet aura.
+
+- **One source, every size.** `apps/mobile/scripts/generate-brand-assets.mjs` draws the mark as SVG and renders all of it with `sharp`: the iOS/universal icon (flattened, since iOS rejects transparency), the splash image, the Android adaptive-icon foreground/background/monochrome layers (scaled into the adaptive safe zone), the web favicon, and `brand-mark.png` for in-app use. Re-run it after changing the mark; don't edit the PNGs by hand.
+- **`app.json`**: name `VYBE`, slug `vybe`, scheme `vybe` (deep links are now `vybe://place/<id>` in native builds), dark-only UI style, obsidian splash and Android backgrounds. The Expo starter's Icon Composer bundle (`assets/expo.icon`) was removed so iOS uses the same icon as everything else.
+- **Launch animation** (`components/animated-icon.tsx`): the starter's blue screen with the Expo logo became the mark plus a "VYBE" wordmark on obsidian, matching the native splash so the hand-off is seamless. The starter's unused `AnimatedIcon`, `WebBadge`, and their assets were deleted.
+- **Auth screens** show the mark above the title via a small `BrandMark` component.
+
 ## Deferred
 
 Sign-in/sign-up/forgot-password (this doc) and the 3-step onboarding flow (`docs/onboarding.md`) are done. Home/Discover/Crews/Profile (`docs/gamification.md`) are done. Still ahead:
 
 - **Direct Chat and Squad Group Chat** — Stitch generated both, but there is no messages/conversations table or backend anywhere in Phases 1–6. This is a new feature, not a reskin, and isn't in `docs/roadmap.md`. Flagged, not started.
-- **App icon and splash screen** — still the unmodified Expo starter logo and blue gradient. Stitch generates app *screens*, not an app icon/logomark asset, so this needs either a dedicated asset or a deliberate decision to typeset a wordmark instead.
 - **Avatar upload** — needs Storage, not yet configured (flagged since Phase 3). Profile's new Edit screen covers every other editable field.
 - **Real ticket payments** — event `price_label` is deliberately display-only; see `docs/gamification.md`.
