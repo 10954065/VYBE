@@ -2003,7 +2003,9 @@ export type Database = {
         Returns: boolean;
       };
       is_outside_now: { Args: { p_user_id: string }; Returns: boolean };
+      is_suspended: { Args: { p_user_id: string }; Returns: boolean };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      register_push_token: { Args: { p_platform: string; p_token: string }; Returns: undefined };
       search_crews: {
         Args: { p_query: string; result_limit?: number };
         Returns: {

@@ -11,7 +11,9 @@ export function useRegisterPushToken() {
   return useMutation({
     mutationFn: async ({ token, platform }: RegisterPushTokenInput) => {
       if (!userId) throw new Error('Not signed in.');
-      const { error } = await supabase.from('push_tokens').upsert({ user_id: userId, token, platform }, { onConflict: 'token' });
+      // An RPC rather than an upsert: the token may still belong to the last
+      // account signed in on this phone, whose row RLS won't let us touch.
+      const { error } = await supabase.rpc('register_push_token', { p_token: token, p_platform: platform });
       if (error) throw error;
     },
   });

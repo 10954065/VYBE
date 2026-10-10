@@ -88,7 +88,10 @@ async function sendBatch(batch: QueuedEvent[]): Promise<void> {
   const { error } = await supabase.from('analytics_events').insert(batch);
   if (!error) return;
 
-  const isPermanent = PERMANENT_ERROR_PREFIXES.some((prefix) => error.code?.startsWith(prefix));
+  const isPermanent =
+    PERMANENT_ERROR_PREFIXES.some((prefix) => error.code?.startsWith(prefix)) ||
+    // Over the per-user event limit: retrying would only hit it again.
+    error.message.includes('rate_limited');
   if (isPermanent) {
     if (__DEV__) console.warn('[analytics] batch rejected, dropping:', error.message);
     return;
