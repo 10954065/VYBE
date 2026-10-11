@@ -81,7 +81,7 @@ export function CommentComposer({ value, onChangeText, onSend, isSending, errorM
           hitSlop={6}
           accessibilityRole="button"
           accessibilityLabel="Send comment"
-          accessibilityState={{ disabled: !canSend, busy: isSending }}
+          aria-busy={isSending}
           style={({ pressed }) => [
             styles.send,
             canSend ? styles.sendActive : styles.sendIdle,

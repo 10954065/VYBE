@@ -68,7 +68,7 @@ export default function ProfileScreen() {
 
           <View style={styles.tabBar}>
             {PROFILE_TABS.map((t) => (
-              <Pressable key={t} onPress={() => setTab(t)} style={styles.tabButtonWrap}>
+              <Pressable accessibilityRole="tab" aria-selected={tab === t} key={t} onPress={() => setTab(t)} style={styles.tabButtonWrap}>
                 <View style={[styles.tabButton, tab === t && styles.tabButtonActive]}>
                   <ThemedText type="smallBold" themeColor={tab === t ? 'onPrimary' : 'textSecondary'}>
                     {PROFILE_TAB_LABELS[t]}

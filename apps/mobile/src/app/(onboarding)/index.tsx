@@ -97,7 +97,7 @@ export default function OnboardingScreen() {
                 />
               )}
               {step > 1 && (
-                <Pressable onPress={goBack} style={styles.backButton}>
+                <Pressable accessibilityRole="button" onPress={goBack} style={styles.backButton}>
                   <ThemedText type="small" themeColor="textSecondary">
                     Back
                   </ThemedText>

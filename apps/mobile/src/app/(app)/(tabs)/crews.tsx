@@ -45,7 +45,7 @@ export default function CrewsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.subNav}>
           {SUB_TABS.map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={styles.subNavButton}>
+            <Pressable accessibilityRole="tab" aria-selected={tab === t} key={t} onPress={() => setTab(t)} style={styles.subNavButton}>
               <ThemedView type={tab === t ? 'backgroundSelected' : 'backgroundElement'} style={styles.subNavPill}>
                 <ThemedText type="smallBold" themeColor={tab === t ? 'primary' : 'textSecondary'}>
                   {SUB_TAB_LABELS[t]}
@@ -76,7 +76,7 @@ export default function CrewsScreen() {
           <>
             <View style={styles.chipRow}>
               {CREW_EXPLORE_SORTS.map((sort) => (
-                <Pressable key={sort} onPress={() => setCrewExploreSort(sort)}>
+                <Pressable accessibilityRole="radio" aria-checked={crewExploreSort === sort} key={sort} onPress={() => setCrewExploreSort(sort)}>
                   <ThemedView type={crewExploreSort === sort ? 'backgroundSelected' : 'backgroundElement'} style={styles.chip}>
                     <ThemedText type="small">{CREW_EXPLORE_SORT_LABELS[sort]}</ThemedText>
                   </ThemedView>

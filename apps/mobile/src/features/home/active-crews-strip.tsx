@@ -28,6 +28,7 @@ export function ActiveCrewsStrip({
     <View style={styles.list}>
       {crews.slice(0, limit).map((crew) => (
         <Pressable
+          accessibilityRole="button"
           key={crew.id}
           onPress={() => router.push({ pathname: '/(app)/crew/[id]', params: { id: crew.id } })}
           style={({ pressed }) => [styles.row, pressed && styles.pressed]}>

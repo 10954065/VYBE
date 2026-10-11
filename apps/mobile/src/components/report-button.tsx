@@ -1,12 +1,13 @@
 import { REPORT_CATEGORIES, type ReportCategory, type ReportTargetType } from '@vybe/shared';
 import { useState } from 'react';
-import { Alert, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedTextInput } from '@/components/themed-text-input';
 import { Colors, Roundness, Spacing } from '@/constants/theme';
 import { useCreateReport } from '@/features/moderation/use-create-report';
+import { showAlert } from '@/lib/confirm';
 import { formatLabel } from '@/lib/format-label';
 import { getErrorMessage } from '@/lib/get-error-message';
 
@@ -35,9 +36,9 @@ export function ReportButton({ targetType, targetId, label = 'Report' }: ReportB
       {
         onSuccess: () => {
           reset();
-          Alert.alert('Report submitted', "Thanks — we'll look into it.");
+          showAlert('Report submitted', "Thanks — we'll look into it.");
         },
-        onError: (error) => Alert.alert('Could not submit report', getErrorMessage(error)),
+        onError: (error) => showAlert('Could not submit report', getErrorMessage(error)),
       },
     );
   };
@@ -59,6 +60,8 @@ export function ReportButton({ targetType, targetId, label = 'Report' }: ReportB
                 const selected = option === category;
                 return (
                   <Pressable
+                    accessibilityRole="radio"
+                    aria-checked={selected}
                     key={option}
                     onPress={() => setCategory(option)}
                     style={[styles.categoryRow, selected && styles.categoryRowSelected]}>

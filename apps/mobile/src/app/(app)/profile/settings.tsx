@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedButton } from '@/components/themed-button';
@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { AnalyticsToggle } from '@/features/analytics/analytics-toggle';
 import { useDeleteAccount } from '@/features/profile/use-delete-account';
+import { confirmDestructive, showAlert } from '@/lib/confirm';
 import { getErrorMessage } from '@/lib/get-error-message';
 import { signOut } from '@/lib/auth/sign-out';
 
@@ -15,17 +16,15 @@ export default function SettingsScreen() {
   const deleteAccount = useDeleteAccount();
 
   const handleDeleteAccount = () => {
-    Alert.alert('Delete account?', 'This permanently deletes your account and everything tied to it. This cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () =>
-          deleteAccount.mutate(undefined, {
-            onError: (error) => Alert.alert('Could not delete account', getErrorMessage(error)),
-          }),
-      },
-    ]);
+    confirmDestructive(
+      'Delete account?',
+      'This permanently deletes your account and everything tied to it. This cannot be undone.',
+      'Delete',
+      () =>
+        deleteAccount.mutate(undefined, {
+          onError: (error) => showAlert('Could not delete account', getErrorMessage(error)),
+        }),
+    );
   };
 
   return (

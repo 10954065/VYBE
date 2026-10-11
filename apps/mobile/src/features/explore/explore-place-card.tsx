@@ -64,6 +64,7 @@ export function ExplorePlaceCard({ place, deviceLocation }: ExplorePlaceCardProp
             <View />
           )}
           <Pressable
+            accessibilityRole="button"
             onPress={() => Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`)}
             style={({ pressed }) => [styles.directionsButton, pressed && styles.pressed]}>
             <ThemedText type="smallBold">Directions</ThemedText>

@@ -12,6 +12,7 @@ interface BusiestPlaceBannerProps {
 export function BusiestPlaceBanner({ place }: BusiestPlaceBannerProps) {
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={() => router.push({ pathname: '/(app)/place/[id]', params: { id: place.place_id } })}
       style={styles.banner}>
       <View style={styles.pill}>

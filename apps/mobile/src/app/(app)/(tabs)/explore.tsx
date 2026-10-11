@@ -133,7 +133,7 @@ export default function ExploreScreen() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
                   <View style={styles.chipRow}>
                     {PLACE_SORTS.map((sort) => (
-                      <Pressable key={sort} onPress={() => setPlaceSort(sort)}>
+                      <Pressable accessibilityRole="radio" aria-checked={placeSort === sort} key={sort} onPress={() => setPlaceSort(sort)}>
                         <ThemedView type={placeSort === sort ? 'backgroundSelected' : 'backgroundElement'} style={styles.chip}>
                           <ThemedText type="small">{PLACE_SORT_LABELS[sort]}</ThemedText>
                         </ThemedView>
@@ -146,7 +146,7 @@ export default function ExploreScreen() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
                   <View style={styles.chipRow}>
                     {EVENT_FILTERS.map((filter) => (
-                      <Pressable key={filter} onPress={() => setEventFilter(filter)}>
+                      <Pressable accessibilityRole="radio" aria-checked={eventFilter === filter} key={filter} onPress={() => setEventFilter(filter)}>
                         <ThemedView type={eventFilter === filter ? 'backgroundSelected' : 'backgroundElement'} style={styles.chip}>
                           <ThemedText type="small">{EVENT_FILTER_LABELS[filter]}</ThemedText>
                         </ThemedView>

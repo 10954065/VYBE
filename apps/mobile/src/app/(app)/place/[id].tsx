@@ -1,7 +1,7 @@
 import { VIBE_TYPES, type VibeType } from '@vybe/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
@@ -19,6 +19,7 @@ import { usePlaceCheckIns } from '@/features/places/use-place-check-ins';
 import { usePlaceEvents } from '@/features/places/use-place-events';
 import { usePlaceVibes } from '@/features/places/use-place-vibes';
 import { useCreateVibe } from '@/features/vibes/use-create-vibe';
+import { showAlert } from '@/lib/confirm';
 import { formatLabel } from '@/lib/format-label';
 import { formatRelativeTime } from '@/lib/format-relative-time';
 import { getErrorMessage } from '@/lib/get-error-message';
@@ -50,7 +51,7 @@ export default function PlaceDetailScreen() {
   const handleCheckIn = () => {
     createCheckIn.mutate(
       { place_id: placeId, visibility: 'followers' },
-      { onError: (error) => Alert.alert('Could not check in', getErrorMessage(error)) },
+      { onError: (error) => showAlert('Could not check in', getErrorMessage(error)) },
     );
   };
 
@@ -59,7 +60,7 @@ export default function PlaceDetailScreen() {
       { vibe_type: vibeType, text: vibeText.trim() || undefined, place_id: placeId, visibility: 'followers' },
       {
         onSuccess: () => setVibeText(''),
-        onError: (error) => Alert.alert('Could not share vibe', getErrorMessage(error)),
+        onError: (error) => showAlert('Could not share vibe', getErrorMessage(error)),
       },
     );
   };
@@ -95,6 +96,8 @@ export default function PlaceDetailScreen() {
                 const selected = type === vibeType;
                 return (
                   <Pressable
+                    accessibilityRole="radio"
+                    aria-checked={selected}
                     key={type}
                     onPress={() => setVibeType(type)}
                     style={[

@@ -41,7 +41,7 @@ export function NotificationRow({ notification, onPress }: NotificationRowProps)
   const isUnread = !notification.read_at;
 
   return (
-    <Pressable onPress={onPress} style={[styles.row, isUnread && styles.unread]}>
+    <Pressable accessibilityRole="button" onPress={onPress} style={[styles.row, isUnread && styles.unread]}>
       <ThemedText style={styles.icon}>{NOTIFICATION_ICONS[notification.type]}</ThemedText>
       <View style={styles.body}>
         <ThemedText type={isUnread ? 'smallBold' : 'small'}>{notificationTitle(notification)}</ThemedText>

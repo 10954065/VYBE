@@ -79,6 +79,7 @@ export function HighlightEventCard({ event }: HighlightEventCardProps) {
 
         <View style={styles.actions}>
           <Pressable
+            accessibilityRole="button"
             onPress={() => rsvp.mutate({ event_id: event.id, status: isGoing ? 'interested' : 'going' })}
             style={({ pressed }) => [styles.joinButton, isGoing && styles.joinButtonActive, pressed && styles.pressed]}>
             <ThemedText type="smallBold" style={styles.joinLabel}>
@@ -86,6 +87,7 @@ export function HighlightEventCard({ event }: HighlightEventCardProps) {
             </ThemedText>
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={handleShare}
             style={({ pressed }) => [styles.shareButton, pressed && styles.pressed]}>
             <ThemedText type="smallBold">Share</ThemedText>

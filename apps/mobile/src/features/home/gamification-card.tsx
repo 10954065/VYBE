@@ -42,6 +42,7 @@ export function GamificationCard({ totalXp, streakCurrentCount }: GamificationCa
       </View>
 
       <Pressable
+        accessibilityRole="button"
         onPress={() => router.push('/(app)/(tabs)/explore')}
         style={({ pressed }) => [styles.checkInButton, pressed && styles.pressed]}>
         <ThemedText type="smallBold" style={styles.checkInLabel}>

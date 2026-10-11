@@ -27,10 +27,11 @@ export function ProfileHeaderCard({ profile, cityName, isOutsideNow }: ProfileHe
           <View />
         )}
         <View style={styles.actionRow}>
-          <Pressable onPress={() => router.push('/(app)/profile/edit')} style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/(app)/profile/edit')} style={({ pressed }) => [styles.actionButton, pressed && styles.pressed]}>
             <ThemedText type="smallBold">Edit</ThemedText>
           </Pressable>
           <Pressable
+            accessibilityRole="button"
             onPress={() => router.push('/(app)/profile/settings')}
             accessibilityLabel="Settings"
             style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>

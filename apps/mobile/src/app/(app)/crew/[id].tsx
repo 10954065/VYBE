@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
@@ -21,6 +21,7 @@ import { useLeaveCrew } from '@/features/crews/use-leave-crew';
 import { useMyMembership } from '@/features/crews/use-my-membership';
 import { useRemoveMember } from '@/features/crews/use-remove-member';
 import { useCreatePost } from '@/features/feed/use-create-post';
+import { showAlert } from '@/lib/confirm';
 import { formatLabel } from '@/lib/format-label';
 import { formatRelativeTime } from '@/lib/format-relative-time';
 import { getErrorMessage } from '@/lib/get-error-message';
@@ -53,11 +54,11 @@ export default function CrewDetailScreen() {
   }
 
   const handleJoin = () => {
-    joinCrew.mutate(crewId!, { onError: (error) => Alert.alert('Could not join', getErrorMessage(error)) });
+    joinCrew.mutate(crewId!, { onError: (error) => showAlert('Could not join', getErrorMessage(error)) });
   };
 
   const handleLeave = () => {
-    leaveCrew.mutate(crewId!, { onError: (error) => Alert.alert('Could not leave', getErrorMessage(error)) });
+    leaveCrew.mutate(crewId!, { onError: (error) => showAlert('Could not leave', getErrorMessage(error)) });
   };
 
   const handlePost = () => {

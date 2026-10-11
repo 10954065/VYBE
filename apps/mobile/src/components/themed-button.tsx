@@ -16,6 +16,10 @@ export function ThemedButton({ title, onPress, loading, disabled, variant = 'pri
 
   return (
     <Pressable
+      accessibilityRole="button"
+      // The label stays while the title is swapped for a spinner.
+      accessibilityLabel={title}
+      aria-busy={!!loading}
       onPress={onPress}
       disabled={isDisabled}
       style={({ pressed }) => [

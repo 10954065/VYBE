@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
@@ -13,6 +13,7 @@ import { useAttendeeSummary } from '@/features/events/use-attendee-summary';
 import { useEvent } from '@/features/events/use-event';
 import { useRsvp } from '@/features/events/use-rsvp';
 import { useCreateCheckIn } from '@/features/checkins/use-create-check-in';
+import { showAlert } from '@/lib/confirm';
 import { formatEventTime } from '@/lib/format-event-time';
 import { formatLabel } from '@/lib/format-label';
 import { getErrorMessage } from '@/lib/get-error-message';
@@ -39,14 +40,14 @@ export default function EventDetailScreen() {
   const handleRsvp = (status: 'interested' | 'going' | 'cancelled') => {
     rsvp.mutate(
       { event_id: eventId!, status },
-      { onError: (error) => Alert.alert('Could not update RSVP', getErrorMessage(error)) },
+      { onError: (error) => showAlert('Could not update RSVP', getErrorMessage(error)) },
     );
   };
 
   const handleCheckIn = () => {
     checkIn.mutate(
       { event_id: eventId, visibility: 'followers' },
-      { onError: (error) => Alert.alert('Could not check in', getErrorMessage(error)) },
+      { onError: (error) => showAlert('Could not check in', getErrorMessage(error)) },
     );
   };
 

@@ -88,6 +88,8 @@ export default function CreateCrewScreen() {
                     const selected = field.value === option;
                     return (
                       <Pressable
+                        accessibilityRole="radio"
+                        aria-checked={selected}
                         key={option}
                         onPress={() => field.onChange(option)}
                         style={[
