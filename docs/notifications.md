@@ -37,6 +37,10 @@ This was verified against the real Expo push endpoint, not mocked: registering a
 
 **What doesn't work yet, and why**: minting a real push token on a device needs an EAS project id (`Constants.expoConfig.extra.eas.projectId`), which this app doesn't have — no `eas init` has been run, and that creates a cloud-side project tied to a real Expo account, not something to set up unilaterally. `apps/mobile/src/features/notifications/use-push-registration.ts` checks for that id and is a documented no-op without it: permissions are never requested, no token is minted, the rest of the app behaves identically. The backend side is fully real and activates the moment a project id exists — same shape of gap as `docs/gamification.md`'s ticket pricing (real column, not wired to the thing that needs an external account).
 
+## Direct messages (Phase 16)
+
+A new message pushes to the other person (`handle_new_message`), gated by a new `notification_preferences.messages` toggle ("Direct messages" in settings). It deliberately writes no `notifications` row: chats have their own unread badge. See `docs/messages.md`.
+
 ## Client
 
 - `features/notifications/` — `useNotifications` (last 50, actor profile embedded via `profiles!notifications_actor_id_fkey` since `notifications` has two FKs into `profiles`), `useUnreadNotificationCount`, `useMarkNotificationRead`/`useMarkAllNotificationsRead`, `useNotificationPreferences`/`useUpdateNotificationPreferences`, `useRegisterPushToken`, `usePushRegistration`.

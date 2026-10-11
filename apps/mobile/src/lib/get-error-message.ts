@@ -7,6 +7,7 @@ const FRIENDLY_MESSAGES: { match: string; message: string }[] = [
   // refused by check_upload_rate (the only P0001 an upload can hit) arrives
   // as this generic text.
   { match: "database error, code: P0001", message: "You're uploading a lot — wait a few minutes and try again." },
+  { match: "cannot_message", message: "You can message people once they follow you." },
 ];
 
 export function getErrorMessage(error: unknown): string {

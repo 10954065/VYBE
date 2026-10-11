@@ -41,6 +41,7 @@ export const notificationPreferencesSchema = z.object({
   xp_milestones: z.boolean(),
   badges: z.boolean(),
   recommendations: z.boolean(),
+  messages: z.boolean(),
   push_enabled: z.boolean(),
 });
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;

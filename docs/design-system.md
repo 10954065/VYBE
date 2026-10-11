@@ -43,6 +43,6 @@ Stitch generates screens, not a logomark, so the brand mark was designed directl
 
 Sign-in/sign-up/forgot-password (this doc) and the 3-step onboarding flow (`docs/onboarding.md`) are done. Home/Discover/Crews/Profile (`docs/gamification.md`) are done. Still ahead:
 
-- **Direct Chat and Squad Group Chat** — Stitch generated both, but there is no messages/conversations table or backend anywhere in Phases 1–6. This is a new feature, not a reskin, and isn't in `docs/roadmap.md`. Flagged, not started.
+- **Direct Chat and Squad Group Chat** — Stitch generated both with no backend behind them. Direct Chat now exists (Phase 16, `docs/messages.md`): the bubbles, day divider and composer follow the Stitch screen, while its event cards, voice notes, live location drop and split-the-bill strip are left out because none of those features exist. Squad Group Chat is still not started.
 - **Avatar upload** — needs Storage, not yet configured (flagged since Phase 3). Profile's new Edit screen covers every other editable field.
 - **Real ticket payments** — event `price_label` is deliberately display-only; see `docs/gamification.md`.

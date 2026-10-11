@@ -3,6 +3,7 @@ import { z } from "zod";
 import { NOTIFICATION_TYPES } from "../constants/notifications";
 import { VIBE_TYPES } from "../constants/vibes";
 import { crewPrivacySchema } from "./crews";
+import { MESSAGE_KINDS } from "./messages";
 import { POST_MAX_PHOTOS, POST_VISIBILITIES } from "./posts";
 import { REPORT_CATEGORIES, REPORT_TARGET_TYPES } from "./moderation";
 
@@ -31,6 +32,9 @@ export const analyticsEventSchemas = {
     })
     .strict(),
   comment_added: z.object({ is_reply: z.boolean() }).strict(),
+  // Never the message itself: only what kind it was.
+  message_sent: z.object({ kind: z.enum(MESSAGE_KINDS) }).strict(),
+  conversation_opened: empty,
   reaction_added: z.object({ target: z.enum(["post", "check_in"]) }).strict(),
   check_in_created: z.object({ at_event: z.boolean() }).strict(),
   vibe_shared: z.object({ vibe_type: z.enum(VIBE_TYPES) }).strict(),

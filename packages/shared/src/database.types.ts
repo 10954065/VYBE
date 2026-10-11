@@ -497,6 +497,52 @@ export type Database = {
           },
         ];
       };
+      conversations: {
+        Row: {
+          created_at: string;
+          id: string;
+          last_message_at: string | null;
+          user_a: string;
+          user_a_read_at: string | null;
+          user_b: string;
+          user_b_read_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          user_a: string;
+          user_a_read_at?: string | null;
+          user_b: string;
+          user_b_read_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          last_message_at?: string | null;
+          user_a?: string;
+          user_a_read_at?: string | null;
+          user_b?: string;
+          user_b_read_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "conversations_user_a_fkey";
+            columns: ["user_a"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversations_user_b_fkey";
+            columns: ["user_b"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       crew_members: {
         Row: {
           crew_id: string;
@@ -784,6 +830,58 @@ export type Database = {
           },
         ];
       };
+      messages: {
+        Row: {
+          body: string | null;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          media_height: number | null;
+          media_path: string | null;
+          media_width: number | null;
+          sender_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body?: string | null;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          media_height?: number | null;
+          media_path?: string | null;
+          media_width?: number | null;
+          sender_id: string;
+        };
+        Update: {
+          body?: string | null;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          media_height?: number | null;
+          media_path?: string | null;
+          media_width?: number | null;
+          sender_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey";
+            columns: ["sender_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notification_preferences: {
         Row: {
           badges: boolean;
@@ -793,6 +891,7 @@ export type Database = {
           event_reminders: boolean;
           follows: boolean;
           likes: boolean;
+          messages: boolean;
           push_enabled: boolean;
           recommendations: boolean;
           streaks: boolean;
@@ -809,6 +908,7 @@ export type Database = {
           event_reminders?: boolean;
           follows?: boolean;
           likes?: boolean;
+          messages?: boolean;
           push_enabled?: boolean;
           recommendations?: boolean;
           streaks?: boolean;
@@ -824,6 +924,7 @@ export type Database = {
           event_reminders?: boolean;
           follows?: boolean;
           likes?: boolean;
+          messages?: boolean;
           push_enabled?: boolean;
           recommendations?: boolean;
           streaks?: boolean;
@@ -1683,6 +1784,9 @@ export type Database = {
         };
         Returns: undefined;
       };
+      can_message: { Args: { p_recipient: string; p_sender: string }; Returns: boolean };
+      can_message_user: { Args: { p_user: string }; Returns: boolean };
+      can_send_in_conversation: { Args: { p_conversation: string }; Returns: boolean };
       check_upload_rate: {
         Args: { p_bucket: string; p_max: number; p_window: string };
         Returns: boolean;
@@ -1703,6 +1807,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      conversation_partner: { Args: { p_conversation: string; p_user: string }; Returns: string };
       create_notification: {
         Args: {
           p_actor_id: string;
@@ -1810,6 +1915,57 @@ export type Database = {
           title: string;
           viewer_status: string;
         }[];
+      };
+      get_inbox: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          conversation_id: string;
+          last_message_at: string;
+          last_message_body: string;
+          last_message_kind: string;
+          last_message_sender_id: string;
+          partner_avatar_url: string;
+          partner_display_name: string;
+          partner_id: string;
+          partner_read_at: string;
+          partner_username: string;
+          unread_count: number;
+        }[];
+      };
+      get_message_contacts: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          id: string;
+          is_friend: boolean;
+          username: string;
+        }[];
+      };
+      get_messages: {
+        Args: {
+          before_created_at?: string;
+          before_id?: string;
+          p_conversation: string;
+          page_size?: number;
+        };
+        Returns: {
+          body: string | null;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          media_height: number | null;
+          media_path: string | null;
+          media_width: number | null;
+          sender_id: string;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "messages";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
       };
       get_my_blocks: {
         Args: Record<PropertyKey, never>;
@@ -2002,6 +2158,7 @@ export type Database = {
           username: string;
         }[];
       };
+      get_unread_conversation_count: { Args: Record<PropertyKey, never>; Returns: number };
       is_business_staff: { Args: { target_business_id: string; viewer: string }; Returns: boolean };
       is_content_visible_to: {
         Args: { content_crew_id: string; owner: string; viewer: string; visibility: string };
@@ -2016,6 +2173,7 @@ export type Database = {
       is_own_upload: { Args: { p_bucket: string; p_name: string }; Returns: boolean };
       is_suspended: { Args: { p_user_id: string }; Returns: boolean };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
       post_media_json: { Args: { p_post_id: string }; Returns: Json };
       register_push_token: { Args: { p_platform: string; p_token: string }; Returns: undefined };
       search_crews: {
@@ -2067,6 +2225,7 @@ export type Database = {
       };
       show_limit: { Args: Record<PropertyKey, never>; Returns: number };
       show_trgm: { Args: { "": string }; Returns: string[] };
+      start_direct_conversation: { Args: { p_user: string }; Returns: string };
       touch_outside_streak: {
         Args: { p_activity_date: string; p_user_id: string };
         Returns: undefined;

@@ -1,6 +1,6 @@
 import type { ProfileRow } from '@vybe/shared';
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
@@ -16,9 +16,11 @@ import { useProfileById } from '@/features/discovery/use-profile-by-id';
 import { useProfileFollowCounts } from '@/features/discovery/use-profile-follow-counts';
 import { useSocialProof } from '@/features/discovery/use-social-proof';
 import { useToggleFollow } from '@/features/feed/use-toggle-follow';
+import { useCanMessage, useStartConversation } from '@/features/messages/use-start-conversation';
 import { useIsBlocked } from '@/features/moderation/use-is-blocked';
 import { useToggleBlock } from '@/features/moderation/use-toggle-block';
-import { confirmDestructive } from '@/lib/confirm';
+import { confirmDestructive, showAlert } from '@/lib/confirm';
+import { getErrorMessage } from '@/lib/get-error-message';
 import { useRedirectIfInvalid } from '@/lib/use-redirect-if-invalid';
 
 const paramsSchema = z.object({ id: z.uuid() });
@@ -53,6 +55,15 @@ function PublicProfileBody({ profileId, profile }: { profileId: string; profile:
   const isBlocked = useIsBlocked(profileId);
   const toggleFollow = useToggleFollow();
   const toggleBlock = useToggleBlock();
+  const canMessage = useCanMessage(profileId);
+  const startConversation = useStartConversation();
+
+  const handleMessage = () => {
+    startConversation.mutate(profileId, {
+      onSuccess: (conversationId) => router.push({ pathname: '/messages/[id]', params: { id: conversationId } }),
+      onError: (error) => showAlert('Could not open the chat', getErrorMessage(error)),
+    });
+  };
 
   const handleToggleFollow = () => {
     toggleFollow.mutate({ target_user_id: profileId, is_following: !!isFollowing.data });
@@ -133,6 +144,14 @@ function PublicProfileBody({ profileId, profile }: { profileId: string; profile:
                   loading={toggleFollow.isPending}
                   onPress={handleToggleFollow}
                 />
+                {canMessage.data && (
+                  <ThemedButton
+                    title="Message"
+                    variant="secondary"
+                    loading={startConversation.isPending}
+                    onPress={handleMessage}
+                  />
+                )}
                 <ShareButton entity="profile" id={profileId} title={name} />
               </View>
               <View style={styles.secondaryActionsRow}>

@@ -9,6 +9,14 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(new Error('rate_limited'))).toMatch(/try again in a minute/);
   });
 
+  it('explains an upload refused by the Storage upload limit', () => {
+    expect(getErrorMessage(new Error('database error, code: P0001'))).toMatch(/uploading a lot/);
+  });
+
+  it('explains why someone cannot be messaged yet', () => {
+    expect(getErrorMessage(new Error('cannot_message'))).toMatch(/once they follow you/);
+  });
+
   it('passes other errors through', () => {
     expect(getErrorMessage(new Error('Invalid login credentials'))).toBe('Invalid login credentials');
   });

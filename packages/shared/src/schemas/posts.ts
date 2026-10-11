@@ -8,13 +8,6 @@ export const POST_VISIBILITIES = ["everyone", "followers", "friends", "crew", "o
 export const postVisibilitySchema = z.enum(POST_VISIBILITIES);
 export type PostVisibility = z.infer<typeof postVisibilitySchema>;
 
-/** Private Storage bucket for post photos (supabase/migrations/20261015000000_photo_posts.sql). */
-export const POST_MEDIA_BUCKET = "post-media";
-/**
- * Every bucket that stores files under `<user id>/`, so deleting an account
- * can remove them. Add each new user-upload bucket here.
- */
-export const USER_UPLOAD_BUCKETS = [POST_MEDIA_BUCKET] as const;
 /** Mirrors post_media's `position between 0 and 3` check. */
 export const POST_MAX_PHOTOS = 4;
 

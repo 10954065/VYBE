@@ -8,7 +8,7 @@ interface ThemedButtonProps {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
 }
 
 export function ThemedButton({ title, onPress, loading, disabled, variant = 'primary' }: ThemedButtonProps) {
@@ -25,6 +25,7 @@ export function ThemedButton({ title, onPress, loading, disabled, variant = 'pri
       style={({ pressed }) => [
         styles.base,
         variant === 'primary' && styles.primary,
+        variant === 'secondary' && styles.secondary,
         variant === 'danger' && styles.danger,
         variant === 'ghost' && styles.ghost,
         isDisabled && styles.disabled,
@@ -45,11 +46,15 @@ const styles = StyleSheet.create({
   base: {
     borderRadius: Roundness.pill,
     paddingVertical: Spacing.three,
+    // Buttons side by side in a row size to their label; without this the
+    // label runs edge to edge and neighbouring buttons read as one line.
+    paddingHorizontal: Spacing.four,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
   },
   primary: { backgroundColor: Colors.primary, ...Glow.primary },
+  secondary: { backgroundColor: Colors.backgroundSelected },
   danger: { backgroundColor: Colors.dangerContainer },
   ghost: { backgroundColor: 'transparent' },
   disabled: { opacity: 0.5 },

@@ -37,6 +37,8 @@ Same mechanism as the existing check-in limit — a `BEFORE INSERT` trigger coun
 | `analytics_events` (signed in) | 500 per 5 minutes |
 | `check_ins` (existing) | 1 per 120 seconds |
 | Photo uploads, `post-media` (Phase 15) | 40 per 5 minutes |
+| `messages` (Phase 16) | 30 per minute |
+| Photo uploads, `chat-media` (Phase 16) | 20 per 5 minutes |
 
 The app shows a plain-language message when a limit is hit, and the analytics tracker drops (rather than retries) a rate-limited batch. Anonymous analytics have no user to limit by; that needs IP-level limiting at the edge, which belongs with deployment (Phase 18).
 
@@ -49,6 +51,7 @@ The app shows a plain-language message when a limit is hit, and the analytics tr
 - `030_visibility` — privacy levels, blocking, suspended users' content, and analytics privacy (Phases 4, 11, 12, 13).
 - `040_push_tokens` — the account-switch claim works and nothing else can reassign or read tokens.
 - `050_photo_posts` (Phase 15) — photo uploads, attachment and reading follow the post's audience; nobody can attach, plant or read someone else's photos.
+- `060_direct_messages` (Phase 16) — only the two people in a conversation can read it, post in it or open its photos; the follow rule, blocks and suspensions hold; senders, timestamps and read positions can't be forged.
 
 Separately, every write the mobile app makes was replayed through the API with the exact payloads its hooks send (25 actions, from onboarding to crew approval to analytics), to confirm the tighter permissions broke none of them.
 
@@ -78,6 +81,15 @@ Two smaller findings are open:
 - **File contents aren't checked against the declared type.** A text file uploaded as `image/jpeg` is accepted and served back as `image/jpeg`. Images are only ever displayed as images, where embedded script doesn't run, so this is low risk; checking magic bytes would need server-side processing of every upload.
 
 **Account deletion now removes uploads.** Deleting an account cascades through every table, but Storage has no foreign key to users, so a deleted account's photos used to stay in the bucket. `/api/account/delete` now deletes the user's files from every bucket in `USER_UPLOAD_BUCKETS` first (and leaves the account intact, for a retry, if that fails). Verified: a throwaway account with two photos deleted through the real route left zero files behind.
+
+## Direct messages (Phase 16)
+
+See `docs/messages.md` for the rules. Two choices worth knowing:
+
+- **The helper that decides who may message whom (`can_message`) can't be called directly.** As an RPC it would answer for any two people, which would reveal who has blocked whom. Clients only get versions that answer about themselves (`can_message_user`, `can_send_in_conversation`).
+- **Realtime relies on RLS, not a channel filter.** The app subscribes to all `messages` and `conversations` changes; Realtime checks each row against the subscriber's own select policy before delivering it.
+
+A security review found no cross-conversation read or write, and three issues that were fixed before release: a suspended partner's chat could still be reopened (definer functions now repeat the suspension rule), message pushes could be sent 30 a minute (now one per burst), and the push title was the sender's raw display name (now cleaned and capped). Details in `docs/messages.md`.
 
 ## Still open
 

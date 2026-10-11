@@ -33,12 +33,17 @@ describe("deleteUserUploads", () => {
   it("removes every file in the user's folder of every upload bucket", async () => {
     const { admin, removed } = fakeAdmin({
       "post-media": [`${USER_ID}/a.jpg`, `${USER_ID}/b.jpg`, "someone-else/c.jpg"],
+      "chat-media": [`${USER_ID}/d.jpg`],
     });
 
     await deleteUserUploads(admin, USER_ID);
 
-    expect(removed.sort()).toEqual([`post-media:${USER_ID}/a.jpg`, `post-media:${USER_ID}/b.jpg`]);
-    expect(USER_UPLOAD_BUCKETS).toContain("post-media");
+    expect(removed.sort()).toEqual([
+      `chat-media:${USER_ID}/d.jpg`,
+      `post-media:${USER_ID}/a.jpg`,
+      `post-media:${USER_ID}/b.jpg`,
+    ]);
+    expect(USER_UPLOAD_BUCKETS).toEqual(["post-media", "chat-media"]);
   });
 
   it("keeps going past a full page of files", async () => {

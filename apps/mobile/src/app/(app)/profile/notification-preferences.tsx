@@ -9,6 +9,7 @@ import { useNotificationPreferences } from '@/features/notifications/use-notific
 import { useUpdateNotificationPreferences } from '@/features/notifications/use-update-notification-preferences';
 
 const TOGGLES: { key: keyof UpdateNotificationPreferencesInput; label: string }[] = [
+  { key: 'messages', label: 'Direct messages' },
   { key: 'follows', label: 'New followers' },
   { key: 'likes', label: 'Reactions to your posts and check-ins' },
   { key: 'comments', label: 'Comments on your posts' },

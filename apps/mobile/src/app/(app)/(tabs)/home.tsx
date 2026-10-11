@@ -22,6 +22,7 @@ import { OutsideNowStrip } from '@/features/home/outside-now-strip';
 import { useMyCrews } from '@/features/crews/use-my-crews';
 import { useMyOutsideStreak } from '@/features/gamification/use-my-streak';
 import { useMyXpTotal } from '@/features/gamification/use-my-xp-total';
+import { MessagesButton } from '@/features/messages/messages-button';
 import { NotificationBell } from '@/features/notifications/notification-bell';
 import { useProfile } from '@/features/profile/use-profile';
 import { getErrorMessage } from '@/lib/get-error-message';
@@ -81,7 +82,10 @@ export default function HomeScreen() {
                   <ThemedText type="title" style={styles.heroGreeting}>
                     {greeting()}, {profile?.display_name ?? profile?.username} 👋
                   </ThemedText>
-                  <NotificationBell />
+                  <View style={styles.heroActions}>
+                    <MessagesButton />
+                    <NotificationBell />
+                  </View>
                 </View>
                 {!!cityOutsideCount && (
                   <ThemedText type="small" themeColor="textSecondary">
@@ -149,6 +153,7 @@ const styles = StyleSheet.create({
   heroSection: { gap: Spacing.one },
   heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   heroGreeting: { flex: 1 },
+  heroActions: { flexDirection: 'row', alignItems: 'center' },
   section: { gap: Spacing.two },
   separator: { height: Spacing.two },
   emptyState: { paddingVertical: Spacing.five, textAlign: 'center' },
