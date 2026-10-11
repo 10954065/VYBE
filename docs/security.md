@@ -57,3 +57,15 @@ After the three Phase 14 migrations, `supabase db advisors --level warn` reports
 - **`extension_in_public`** for `pg_trgm` and `pg_net` — accepted. Moving `pg_trgm` means recreating every trigram index and the search functions that use its operators; `pg_net` is managed by Supabase. Neither exposes data.
 
 `unused_index` notices are informational and based on local traffic only.
+
+The same holds on a brand-new database built from all migrations plus the seed (checked by replaying them into a throwaway Postgres, as the CI database job does).
+
+## Web app headers
+
+`apps/web/next.config.ts` sends, on every response: a Content-Security-Policy of `frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a `Permissions-Policy` turning off camera, microphone, geolocation and payment, and HSTS (ignored over plain http locally, enforced once deployed). `X-Powered-By` is off. Verified: the admin sign-in, pages, and Server Actions (suspend / lift suspension) all still work under `form-action 'self'`.
+
+## Still open
+
+- **A `script-src` CSP.** Restricting scripts needs a per-request nonce injected by middleware, which also makes every page dynamic — a deployment decision for Phase 15, not a header to bolt on now.
+- **Rate limiting anonymous traffic.** Per-user limits can't apply to requests with no user (anonymous analytics, sign-up attempts). That needs IP-based limiting at the edge (Phase 15).
+- **`extension_in_public`**, accepted as above.
