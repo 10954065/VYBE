@@ -1,18 +1,16 @@
 import type { FeedPost } from '@vybe/shared';
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PostCard } from '@/components/post-card';
 import { SuggestedPeopleStrip } from '@/components/suggested-people-strip';
-import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 import { useCreatePost } from '@/features/feed/use-create-post';
 import { useHomeFeed } from '@/features/feed/use-home-feed';
+import { PostComposer, type PostDraft } from '@/features/feed/post-composer';
 import { useToggleReaction } from '@/features/feed/use-toggle-reaction';
 import { ActiveCrewsStrip } from '@/features/home/active-crews-strip';
 import { useCityOutsideCount } from '@/features/home/use-city-outside-count';
@@ -39,7 +37,6 @@ export default function HomeScreen() {
   const feed = useHomeFeed();
   const createPost = useCreatePost();
   const toggleReaction = useToggleReaction();
-  const [draft, setDraft] = useState('');
 
   const { data: profile } = useProfile();
   const { data: cityOutsideCount } = useCityOutsideCount();
@@ -51,10 +48,8 @@ export default function HomeScreen() {
 
   const posts = feed.data?.pages.flat() ?? [];
 
-  const handlePost = () => {
-    const body = draft.trim();
-    if (!body) return;
-    createPost.mutate({ body, visibility: 'everyone' }, { onSuccess: () => setDraft('') });
+  const handlePost = ({ body, photos }: PostDraft, onPosted: () => void) => {
+    createPost.mutate({ body, photos, visibility: 'everyone' }, { onSuccess: onPosted });
   };
 
   const renderItem = ({ item }: { item: FeedPost }) => (
@@ -118,22 +113,12 @@ export default function HomeScreen() {
 
               <View style={styles.section}>
                 <ThemedText type="subtitle">From people you follow</ThemedText>
-                <ThemedView type="backgroundElement" style={styles.composer}>
-                  <ThemedTextInput
-                    placeholder="What's happening?"
-                    value={draft}
-                    onChangeText={setDraft}
-                    multiline
-                    autoCapitalize="sentences"
-                  />
-                  {createPost.isError && <ThemedText type="small">{getErrorMessage(createPost.error)}</ThemedText>}
-                  <ThemedButton
-                    title="Post"
-                    onPress={handlePost}
-                    loading={createPost.isPending}
-                    disabled={!draft.trim()}
-                  />
-                </ThemedView>
+                <PostComposer
+                  placeholder="What's happening?"
+                  isPosting={createPost.isPending}
+                  errorMessage={createPost.isError ? getErrorMessage(createPost.error) : undefined}
+                  onPost={handlePost}
+                />
                 <SuggestedPeopleStrip />
               </View>
             </View>
@@ -165,7 +150,6 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   heroGreeting: { flex: 1 },
   section: { gap: Spacing.two },
-  composer: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   separator: { height: Spacing.two },
   emptyState: { paddingVertical: Spacing.five, textAlign: 'center' },
   footer: { paddingVertical: Spacing.three },

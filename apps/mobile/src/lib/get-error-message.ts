@@ -3,6 +3,10 @@
 // supabase/migrations/20261014000000_security_hardening.sql).
 const FRIENDLY_MESSAGES: { match: string; message: string }[] = [
   { match: "rate_limited", message: "You're doing that a lot — take a breather and try again in a minute." },
+  // The Storage API doesn't pass the database's message through: an upload
+  // refused by check_upload_rate (the only P0001 an upload can hit) arrives
+  // as this generic text.
+  { match: "database error, code: P0001", message: "You're uploading a lot — wait a few minutes and try again." },
 ];
 
 export function getErrorMessage(error: unknown): string {

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { NOTIFICATION_TYPES } from "../constants/notifications";
 import { VIBE_TYPES } from "../constants/vibes";
 import { crewPrivacySchema } from "./crews";
-import { POST_VISIBILITIES } from "./posts";
+import { POST_MAX_PHOTOS, POST_VISIBILITIES } from "./posts";
 import { REPORT_CATEGORIES, REPORT_TARGET_TYPES } from "./moderation";
 
 /**
@@ -23,7 +23,13 @@ export const analyticsEventSchemas = {
   onboarding_completed: z
     .object({ genre_count: z.number().int().min(0), neighborhood_count: z.number().int().min(0) })
     .strict(),
-  post_created: z.object({ visibility: z.enum(POST_VISIBILITIES), in_crew: z.boolean() }).strict(),
+  post_created: z
+    .object({
+      visibility: z.enum(POST_VISIBILITIES),
+      in_crew: z.boolean(),
+      photo_count: z.number().int().min(0).max(POST_MAX_PHOTOS),
+    })
+    .strict(),
   comment_added: z.object({ is_reply: z.boolean() }).strict(),
   reaction_added: z.object({ target: z.enum(["post", "check_in"]) }).strict(),
   check_in_created: z.object({ at_event: z.boolean() }).strict(),

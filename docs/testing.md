@@ -4,8 +4,8 @@ Phase 14 added the project's first automated tests. Three layers, each covering 
 
 | Layer | Tool | Command | What it covers |
 |---|---|---|---|
-| Database | pgTAP | `npm run test:db` (needs the local stack: `npx supabase start`) | RLS, column grants, triggers, RPCs — who can see and do what. 54 tests. |
-| Unit | Vitest | `npm test` | Plain TypeScript logic in `packages/shared`, `apps/mobile/src/lib`, and `apps/web`. 57 tests. |
+| Database | pgTAP | `npm run test:db` (needs the local stack: `npx supabase start`) | RLS, column grants, triggers, RPCs, Storage rules — who can see and do what. 78 tests. |
+| Unit | Vitest | `npm test` | Plain TypeScript logic in `packages/shared`, `apps/mobile/src/lib`, and `apps/web`. 65 tests. |
 | Static | tsc + ESLint | `npm run typecheck`, `npm run lint` | All workspaces. |
 
 ## Database tests

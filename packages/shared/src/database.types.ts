@@ -1018,8 +1018,8 @@ export type Database = {
           media_type: string;
           position: number;
           post_id: string;
+          storage_path: string;
           thumbnail_url: string | null;
-          url: string;
           width: number | null;
         };
         ComputedFields: never;
@@ -1031,8 +1031,8 @@ export type Database = {
           media_type: string;
           position?: number;
           post_id: string;
+          storage_path: string;
           thumbnail_url?: string | null;
-          url: string;
           width?: number | null;
         };
         Update: {
@@ -1043,8 +1043,8 @@ export type Database = {
           media_type?: string;
           position?: number;
           post_id?: string;
+          storage_path?: string;
           thumbnail_url?: string | null;
-          url?: string;
           width?: number | null;
         };
         Relationships: [
@@ -1683,6 +1683,10 @@ export type Database = {
         };
         Returns: undefined;
       };
+      check_upload_rate: {
+        Args: { p_bucket: string; p_max: number; p_window: string };
+        Returns: boolean;
+      };
       complete_onboarding: {
         Args: {
           p_avatar_url: string;
@@ -1709,6 +1713,10 @@ export type Database = {
           p_user_id: string;
         };
         Returns: undefined;
+      };
+      create_post: {
+        Args: { p_body?: string; p_crew_id?: string; p_media?: Json; p_visibility?: string };
+        Returns: string;
       };
       evaluate_badges: { Args: { p_user_id: string }; Returns: undefined };
       get_analytics_overview: { Args: { p_days: number }; Returns: Json };
@@ -1779,6 +1787,7 @@ export type Database = {
           crew_id: string;
           id: string;
           kind: string;
+          media: Json;
           poll_options: Json;
           reaction_count: number;
           updated_at: string;
@@ -1900,6 +1909,7 @@ export type Database = {
           crew_id: string;
           id: string;
           kind: string;
+          media: Json;
           poll_options: Json;
           reaction_count: number;
           updated_at: string;
@@ -2003,8 +2013,10 @@ export type Database = {
         Returns: boolean;
       };
       is_outside_now: { Args: { p_user_id: string }; Returns: boolean };
+      is_own_upload: { Args: { p_bucket: string; p_name: string }; Returns: boolean };
       is_suspended: { Args: { p_user_id: string }; Returns: boolean };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
+      post_media_json: { Args: { p_post_id: string }; Returns: Json };
       register_push_token: { Args: { p_platform: string; p_token: string }; Returns: undefined };
       search_crews: {
         Args: { p_query: string; result_limit?: number };

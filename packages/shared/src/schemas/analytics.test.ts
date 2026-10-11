@@ -10,7 +10,7 @@ describe("analytics event catalog", () => {
   });
 
   it("accepts an event's documented properties", () => {
-    expect(analyticsEventSchemas.post_created.safeParse({ visibility: "followers", in_crew: false }).success).toBe(true);
+    expect(analyticsEventSchemas.post_created.safeParse({ visibility: "followers", in_crew: false, photo_count: 2 }).success).toBe(true);
     expect(analyticsEventSchemas.app_opened.safeParse({}).success).toBe(true);
   });
 
@@ -18,7 +18,7 @@ describe("analytics event catalog", () => {
   // and to PostHog, so nothing beyond the declared, non-personal fields may
   // ride along.
   it.each([
-    ["post_created", { visibility: "everyone", in_crew: false, body: "my post text" }],
+    ["post_created", { visibility: "everyone", in_crew: false, photo_count: 0, body: "my post text" }],
     ["search_performed", { query_length: 6, result_count: 2, query: "labadi" }],
     ["app_opened", { email: "someone@example.com" }],
   ] as const)("rejects undeclared properties on %s", (name, properties) => {

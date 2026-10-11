@@ -34,6 +34,22 @@
       "expo-router",
       "expo-notifications",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "VYBE needs your photos so you can share them in posts and messages.",
+          "cameraPermission": "VYBE uses the camera so you can take photos and snaps to share.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "VYBE uses the camera so you can take photos and snaps to share.",
+          "microphonePermission": "VYBE uses the microphone to record sound with your video snaps.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#090A0F",

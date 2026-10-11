@@ -32,10 +32,31 @@ function TargetDescription({ report }: { report: AdminReport }) {
     return <span className="text-neutral-500">Already removed or deleted</span>;
   }
   return (
-    <span className="text-neutral-200">
-      {target.label ? <span className="line-clamp-2">{target.label}</span> : <code className="text-xs">{report.targetId}</code>}
-      {target.suspended && <span className="ml-2 rounded bg-red-500/15 px-1.5 py-0.5 text-xs text-red-300">Suspended</span>}
-    </span>
+    <div className="flex flex-col gap-2 text-neutral-200">
+      <span>
+        {target.label ? (
+          <span className="line-clamp-2">{target.label}</span>
+        ) : (
+          !target.photoUrls.length && <code className="text-xs">{report.targetId}</code>
+        )}
+        {target.suspended && <span className="ml-2 rounded bg-red-500/15 px-1.5 py-0.5 text-xs text-red-300">Suspended</span>}
+      </span>
+      {target.photoUrls.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {target.photoUrls.map((url, index) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer" title="Open full size">
+              {/* Short-lived signed URLs from a private bucket: nothing for next/image to optimize or cache. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`Reported photo ${index + 1} of ${target.photoUrls.length}`}
+                className="h-28 w-28 rounded-md border border-neutral-800 object-cover"
+              />
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

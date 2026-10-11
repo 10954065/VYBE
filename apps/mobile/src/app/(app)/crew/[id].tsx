@@ -1,14 +1,13 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
+import { PostPhotos } from '@/components/post-photos';
 import { ReportButton } from '@/components/report-button';
 import { ShareButton } from '@/components/share-button';
 import { ThemedButton } from '@/components/themed-button';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedTextInput } from '@/components/themed-text-input';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { useApproveMember } from '@/features/crews/use-approve-member';
@@ -20,6 +19,7 @@ import { useJoinCrew } from '@/features/crews/use-join-crew';
 import { useLeaveCrew } from '@/features/crews/use-leave-crew';
 import { useMyMembership } from '@/features/crews/use-my-membership';
 import { useRemoveMember } from '@/features/crews/use-remove-member';
+import { PostComposer, type PostDraft } from '@/features/feed/post-composer';
 import { useCreatePost } from '@/features/feed/use-create-post';
 import { showAlert } from '@/lib/confirm';
 import { formatLabel } from '@/lib/format-label';
@@ -47,8 +47,6 @@ export default function CrewDetailScreen() {
   const createPost = useCreatePost();
   useRedirectIfInvalid(parsedParams.success, '/explore');
 
-  const [draft, setDraft] = useState('');
-
   if (!parsedParams.success) {
     return null;
   }
@@ -61,13 +59,8 @@ export default function CrewDetailScreen() {
     leaveCrew.mutate(crewId!, { onError: (error) => showAlert('Could not leave', getErrorMessage(error)) });
   };
 
-  const handlePost = () => {
-    const body = draft.trim();
-    if (!body) return;
-    createPost.mutate(
-      { body, visibility: 'crew', crew_id: crewId },
-      { onSuccess: () => setDraft('') },
-    );
+  const handlePost = ({ body, photos }: PostDraft, onPosted: () => void) => {
+    createPost.mutate({ body, photos, visibility: 'crew', crew_id: crewId }, { onSuccess: onPosted });
   };
 
   return (
@@ -146,23 +139,19 @@ export default function CrewDetailScreen() {
           {membership.data?.status === 'approved' && (
             <View style={styles.section}>
               <ThemedText type="smallBold">Crew feed</ThemedText>
-              <ThemedView type="backgroundElement" style={styles.composer}>
-                <ThemedTextInput
-                  placeholder="Share something with the crew"
-                  value={draft}
-                  onChangeText={setDraft}
-                  multiline
-                  autoCapitalize="sentences"
-                />
-                {createPost.isError && <ThemedText type="small">{getErrorMessage(createPost.error)}</ThemedText>}
-                <ThemedButton title="Post" onPress={handlePost} loading={createPost.isPending} disabled={!draft.trim()} />
-              </ThemedView>
+              <PostComposer
+                placeholder="Share something with the crew"
+                isPosting={createPost.isPending}
+                errorMessage={createPost.isError ? getErrorMessage(createPost.error) : undefined}
+                onPost={handlePost}
+              />
 
               {posts.data?.length ? (
                 posts.data.map((post) => (
                   <ThemedView key={post.id} type="backgroundElement" style={styles.postRow}>
                     <ThemedText type="smallBold">{post.author_display_name ?? post.author_username}</ThemedText>
                     {post.body && <ThemedText type="small">{post.body}</ThemedText>}
+                    <PostPhotos media={post.media} />
                     <ThemedText type="small" themeColor="textSecondary">
                       {formatRelativeTime(post.created_at)}
                     </ThemedText>
@@ -189,6 +178,5 @@ const styles = StyleSheet.create({
   section: { gap: Spacing.two },
   memberRow: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   memberActions: { flexDirection: 'row', gap: Spacing.two },
-  composer: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
-  postRow: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.half },
+  postRow: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
 });

@@ -48,6 +48,36 @@ Two real bugs fixed alongside it:
 - **Stale comment count on the post screen.** `use-add-comment` invalidated the comments list and the home feed but not `['post', id]` (added in Phase 10) or crew feeds, so the post above the comments kept its old count. Now invalidates all three.
 - **Sent comments landed off-screen.** After sending, the list now follows its end until the new comment is in view. `scrollToEnd` alone stopped short — it relies on FlatList's estimate for rows it hasn't measured yet — so it scrolls by the real reported content height minus the list's height instead.
 
+## Photo posts (Phase 15)
+
+`post_media` had been in the schema since Phase 2 with nothing writing to it. Now a post can carry up to four photos, from the library or the camera, on the home feed and in crew feeds.
+
+**Flow.** The composer (`features/feed/post-composer.tsx`) collects local photos. On Post, `use-create-post` resizes each one on the phone (`lib/media/photo.ts`: long edge at most 1600px, re-encoded as JPEG at 0.8), uploads it to `<user id>/<random>.jpg` in the `post-media` bucket, then calls `create_post(body, visibility, crew_id, media)`, which inserts the post and its photos in one transaction. If anything fails after an upload, the uploaded files are deleted again. A 4032×3024 phone photo arrives as a 1600×1200 file of about 30 KB in testing.
+
+**Photos are private, like the posts they belong to.** The bucket isn't public: a public bucket would let anyone with a photo's link see it, regardless of the post's audience or blocks. The app asks Storage for short-lived signed links (`useSignedUrls`, one hour, re-signed before they lapse; `expo-image` caches by storage path so re-signing doesn't re-download), and Storage only signs a path the viewer's RLS can read: their own uploads, or a photo attached to a post `posts_select_visible` lets them see. Privacy levels, blocks and suspensions carry over to photos with no extra rules.
+
+**Rules enforced in the database** (`20261015000000_photo_posts.sql`):
+
+- Uploads only into your own folder, only JPEG/PNG/WebP, at most 10 MB, at most 40 per 5 minutes, never while suspended.
+- A post can only attach photos its author uploaded. Without this, the read rule above would leak: attach someone's friends-only photo to your own public post and everyone could read it.
+- At most four photos, never edited after posting.
+
+**Location data is stripped.** Phones write GPS coordinates into every photo's EXIF. Re-encoding on the phone drops it: a test photo tagged with coordinates arrived in Storage with no EXIF at all.
+
+**A real bug found while building it.** The first version of the "author uploaded this photo" check read `storage.objects` from inside `post_media`'s insert rule. Postgres rejected every photo post with "infinite recursion detected in policy": the storage read rule reads `post_media`, which read `storage.objects`. The check is now a small security-definer function (`is_own_upload`) that answers only for the caller's own uploads.
+
+**Account deletion** removes the account's photos too (see `docs/security.md`).
+
+**Moderation.** The admin dashboard shows a reported post's photos (signed server-side for 10 minutes), so moderators can judge a photo, not just its caption.
+
+**Verified:**
+
+- **Browser (Expo web):** two-photo and one-photo posts on the home and crew feeds, the full-screen viewer opening on the tapped photo, and the reported photos in the admin dashboard.
+- **Database:** 20 pgTAP tests in `050_photo_posts`.
+- **Storage API, with real accounts:**
+  - A follower gets a signed link for a followers-only photo; a non-follower, a signed-out visitor and a public URL are all refused.
+  - Attaching another user's photo, uploading into their folder, and uploading a non-image are all rejected.
+
 ## Verified end-to-end (local stack, real browser)
 
 Signed in as a seeded dev user with 25 staggered test posts across 3 followed accounts: feed pagination (first page caps at 20, scrolling loads the rest via the keyset cursor), creating a post (appears at the top immediately), toggling a reaction (optimistic update, persisted, survives reload), viewing and adding a comment (count syncs back into the feed), and following a suggested person (removes them from the suggestion strip, confirmed via a direct `201 Created` on `/rest/v1/follows`).

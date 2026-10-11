@@ -1,6 +1,7 @@
 import type { FeedPost } from '@vybe/shared';
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { PostPhotos } from '@/components/post-photos';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -25,6 +26,8 @@ export function PostCard({ post, onToggleReaction, onPressComments }: PostCardPr
       </View>
 
       {post.body && <ThemedText>{post.body}</ThemedText>}
+
+      <PostPhotos media={post.media} />
 
       <View style={styles.actions}>
         <Pressable

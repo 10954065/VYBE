@@ -1,15 +1,26 @@
 import "server-only";
-import { REPORT_STATUSES, type ReportCategory, type ReportStatus, type ReportTargetType } from "@vybe/shared";
+import {
+  POST_MEDIA_BUCKET,
+  REPORT_STATUSES,
+  type ReportCategory,
+  type ReportStatus,
+  type ReportTargetType,
+} from "@vybe/shared";
 
 import { requireAdmin } from "@/lib/auth/admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const REPORTS_LIMIT = 100;
+// Long enough to review a page of reports, short enough not to matter if a
+// link leaks: post photos live in a private bucket.
+const PHOTO_URL_TTL_SECONDS = 10 * 60;
 
 export interface ReportTarget {
   label: string | null;
   removed: boolean;
   suspended: boolean;
+  /** Signed URLs of a reported post's photos, in order. */
+  photoUrls: string[];
 }
 
 export interface AdminReport {
@@ -27,7 +38,7 @@ export interface AdminReport {
 }
 
 type AdminClient = ReturnType<typeof createAdminClient>;
-type ContentRow = { id: string; deleted_at: string | null; label: string | null };
+type ContentRow = { id: string; deleted_at: string | null; label: string | null; photoUrls?: string[] };
 
 export function parseStatusFilter(value: string | undefined): ReportStatus | "all" {
   if (value === "all") return "all";
@@ -40,8 +51,31 @@ function idsOf(reports: { target_type: string; target_id: string }[], type: Repo
 
 function toContentMap(rows: ContentRow[] | null): Map<string, ReportTarget> {
   return new Map(
-    (rows ?? []).map((row) => [row.id, { label: row.label, removed: row.deleted_at !== null, suspended: false }]),
+    (rows ?? []).map((row) => [
+      row.id,
+      { label: row.label, removed: row.deleted_at !== null, suspended: false, photoUrls: row.photoUrls ?? [] },
+    ]),
   );
+}
+
+// A moderator has to see a reported photo to judge it.
+async function withPhotoUrls(
+  admin: AdminClient,
+  posts: (ContentRow & { post_media: { storage_path: string; position: number }[] })[],
+): Promise<ContentRow[]> {
+  const paths = posts.flatMap((post) => post.post_media.map((media) => media.storage_path));
+  if (paths.length === 0) return posts;
+
+  const { data, error } = await admin.storage.from(POST_MEDIA_BUCKET).createSignedUrls(paths, PHOTO_URL_TTL_SECONDS);
+  if (error) throw error;
+  const urlByPath = new Map(data.flatMap((item) => (item.path && item.signedUrl ? [[item.path, item.signedUrl]] : [])));
+
+  return posts.map(({ post_media, ...post }) => ({
+    ...post,
+    photoUrls: [...post_media]
+      .sort((a, b) => a.position - b.position)
+      .flatMap((media) => urlByPath.get(media.storage_path) ?? []),
+  }));
 }
 
 // One query per content table. Each is a literal select string so the typed
@@ -49,7 +83,10 @@ function toContentMap(rows: ContentRow[] | null): Map<string, ReportTarget> {
 // would type everything as an error and lose that.
 async function fetchContentTargets(admin: AdminClient, reports: { target_type: string; target_id: string }[]) {
   const [posts, comments, places, events, crews] = await Promise.all([
-    admin.from("posts").select("id, deleted_at, label:body").in("id", idsOf(reports, "post")),
+    admin
+      .from("posts")
+      .select("id, deleted_at, label:body, post_media(storage_path, position)")
+      .in("id", idsOf(reports, "post")),
     admin.from("comments").select("id, deleted_at, label:body").in("id", idsOf(reports, "comment")),
     admin.from("places").select("id, deleted_at, label:name").in("id", idsOf(reports, "place")),
     admin.from("events").select("id, deleted_at, label:title").in("id", idsOf(reports, "event")),
@@ -61,7 +98,7 @@ async function fetchContentTargets(admin: AdminClient, reports: { target_type: s
   }
 
   return {
-    post: toContentMap(posts.data),
+    post: toContentMap(await withPhotoUrls(admin, posts.data ?? [])),
     comment: toContentMap(comments.data),
     place: toContentMap(places.data),
     event: toContentMap(events.data),
@@ -105,15 +142,20 @@ export async function getReports(statusFilter: ReportStatus | "all"): Promise<Ad
 
   return reports.map((report) => {
     const targetType = report.target_type as ReportTargetType;
-    let target: ReportTarget = { label: null, removed: false, suspended: false };
+    let target: ReportTarget = { label: null, removed: false, suspended: false, photoUrls: [] };
 
     if (targetType === "user") {
       const profile = profilesById.get(report.target_id);
       target = profile
-        ? { label: `@${profile.username}`, removed: false, suspended: profile.suspended_at !== null }
-        : { label: null, removed: true, suspended: false };
+        ? { label: `@${profile.username}`, removed: false, suspended: profile.suspended_at !== null, photoUrls: [] }
+        : { label: null, removed: true, suspended: false, photoUrls: [] };
     } else if (targetType !== "business") {
-      target = content[targetType].get(report.target_id) ?? { label: null, removed: true, suspended: false };
+      target = content[targetType].get(report.target_id) ?? {
+        label: null,
+        removed: true,
+        suspended: false,
+        photoUrls: [],
+      };
     }
 
     return {
