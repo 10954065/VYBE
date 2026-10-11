@@ -20,3 +20,7 @@ All three were found by actually running the app in a browser against the live l
 ## Known limitation (not a VYBE bug)
 
 `expo-router/unstable-native-tabs`'s web fallback doesn't support deep-linking directly to a non-default tab (`/profile` redirects to `/`) and renders generic placeholder chrome unrelated to the configured `NativeTabs.Trigger`s. This is a limitation of that experimental API's web shim — the real iOS/Android native tab bars it renders in production don't have this issue. Not worth working around since web is a dev-convenience target for this app, not a shipped platform (per the architecture: web product surface is `apps/web`, a separate Next.js app).
+
+## Sign-up failed for long email names (fixed in Phase 15)
+
+`handle_new_user()` gives every new account a placeholder username: the part of the email before the @, stripped to allowed characters, plus `_` and 8 characters of the user id. Nothing kept that within `username_format`'s 30-character limit, so anyone with more than 21 characters before the @ (e.g. `firstname.lastname.work@gmail.com`) got "Database error creating new user" and could not sign up at all. Found while creating a test account in Phase 15; `20261015010000_signup_long_email.sql` shortens the email part to 21 characters, and `005_signup.test.sql` pins the long, very long, too-short and symbol-filled cases.
