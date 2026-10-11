@@ -4,7 +4,7 @@ import { createCrewInputSchema, type CreateCrewInput } from "@vybe/shared";
 import { useProfile } from "@/features/profile/use-profile";
 import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
-import { slugify } from "@/lib/slugify";
+import { CREW_SLUG_MAX_LENGTH, slugify } from "@/lib/slugify";
 import { supabase } from "@/lib/supabase/client";
 
 export function useCreateCrew() {
@@ -22,7 +22,7 @@ export function useCreateCrew() {
         .from("crews")
         .insert({
           name: parsed.name,
-          slug: slugify(parsed.name),
+          slug: slugify(parsed.name, CREW_SLUG_MAX_LENGTH),
           description: parsed.description,
           category: parsed.category,
           city_id: profile?.city_id,

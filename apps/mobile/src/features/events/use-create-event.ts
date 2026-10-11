@@ -4,7 +4,7 @@ import { createEventInputSchema, type CreateEventInput } from "@vybe/shared";
 import { useProfile } from "@/features/profile/use-profile";
 import { track } from "@/lib/analytics/analytics";
 import { useSession } from "@/lib/auth/session-provider";
-import { slugify } from "@/lib/slugify";
+import { EVENT_SLUG_MAX_LENGTH, slugify } from "@/lib/slugify";
 import { supabase } from "@/lib/supabase/client";
 
 export function useCreateEvent() {
@@ -20,7 +20,7 @@ export function useCreateEvent() {
 
       const { error } = await supabase.from("events").insert({
         title: parsed.title,
-        slug: slugify(parsed.title),
+        slug: slugify(parsed.title, EVENT_SLUG_MAX_LENGTH),
         description: parsed.description,
         category: parsed.category,
         place_id: parsed.place_id,
