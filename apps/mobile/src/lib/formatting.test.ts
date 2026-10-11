@@ -17,6 +17,12 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(new Error('cannot_message'))).toMatch(/once they follow you/);
   });
 
+  it('explains a display name the database refused', () => {
+    expect(
+      getErrorMessage(new Error('new row for relation "profiles" violates check constraint "profiles_display_name_clean"')),
+    ).toMatch(/up to 60 characters/);
+  });
+
   it('passes other errors through', () => {
     expect(getErrorMessage(new Error('Invalid login credentials'))).toBe('Invalid login credentials');
   });

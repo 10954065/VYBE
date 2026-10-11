@@ -1,7 +1,7 @@
 -- Every email address must be able to sign up: the profile created for a
 -- new auth user must satisfy username_format whatever the email looks like.
 begin;
-select plan(4);
+select plan(5);
 
 create function pg_temp.username_for(p_email text) returns text language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -27,6 +27,14 @@ select matches(
 select matches(
   pg_temp.username_for('Kofi-Boateng+vybe@example.com'), '^kofiboatengvybe_[0-9a-f]{8}$',
   'characters a username cannot hold are dropped'
+);
+
+-- The starting display name (the email's local part, up to 64 characters)
+-- has to fit profiles_display_name_clean's 60 too.
+select pg_temp.username_for(repeat('b', 64) || '@example.com');
+select is(
+  (select char_length(display_name) from public.profiles where username like 'bbbb%' order by created_at desc limit 1),
+  60, 'a very long email name gives a display name cut to 60 characters'
 );
 
 select * from finish();

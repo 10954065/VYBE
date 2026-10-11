@@ -19,7 +19,7 @@ export function useConversation(conversationId: string | undefined) {
     queryFn: async (): Promise<Conversation | null> => {
       const { data, error } = await supabase
         .from('conversations')
-        .select('id, user_a, user_b, created_at, last_message_at, user_a_read_at, user_b_read_at')
+        .select('id, user_a, user_b, created_at, last_message_at, user_a_read_at, user_b_read_at, streak_day, streak_count')
         .eq('id', conversationId!)
         .maybeSingle();
       if (error) throw error;

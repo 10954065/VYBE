@@ -15,6 +15,7 @@ export * from "./schemas/profiles";
 export * from "./schemas/auth";
 export * from "./schemas/posts";
 export * from "./schemas/messages";
+export * from "./schemas/snaps";
 export * from "./schemas/follows";
 export * from "./schemas/places";
 export * from "./schemas/vibes";

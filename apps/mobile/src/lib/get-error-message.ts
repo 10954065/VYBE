@@ -8,6 +8,7 @@ const FRIENDLY_MESSAGES: { match: string; message: string }[] = [
   // as this generic text.
   { match: "database error, code: P0001", message: "You're uploading a lot — wait a few minutes and try again." },
   { match: "cannot_message", message: "You can message people once they follow you." },
+  { match: "profiles_display_name_clean", message: "Your name can be up to 60 characters, on one line." },
 ];
 
 export function getErrorMessage(error: unknown): string {

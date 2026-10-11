@@ -31,6 +31,8 @@ function resolveNotificationHref(notification: Notification): { pathname: string
       return { pathname: '/(app)/event/[id]', params: { id: notification.target_id } };
     case 'profile':
       return { pathname: '/(app)/profile/[id]', params: { id: notification.target_id } };
+    case 'conversation':
+      return { pathname: '/(app)/messages/[id]', params: { id: notification.target_id } };
     default:
       return null;
   }

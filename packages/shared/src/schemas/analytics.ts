@@ -4,6 +4,7 @@ import { NOTIFICATION_TYPES } from "../constants/notifications";
 import { VIBE_TYPES } from "../constants/vibes";
 import { crewPrivacySchema } from "./crews";
 import { MESSAGE_KINDS } from "./messages";
+import { SNAP_MAX_RECIPIENTS, snapMediaTypeSchema } from "./snaps";
 import { POST_MAX_PHOTOS, POST_VISIBILITIES } from "./posts";
 import { REPORT_CATEGORIES, REPORT_TARGET_TYPES } from "./moderation";
 
@@ -35,6 +36,10 @@ export const analyticsEventSchemas = {
   // Never the message itself: only what kind it was.
   message_sent: z.object({ kind: z.enum(MESSAGE_KINDS) }).strict(),
   conversation_opened: empty,
+  snap_sent: z
+    .object({ kind: snapMediaTypeSchema, recipient_count: z.number().int().min(1).max(SNAP_MAX_RECIPIENTS) })
+    .strict(),
+  snap_opened: z.object({ kind: snapMediaTypeSchema }).strict(),
   reaction_added: z.object({ target: z.enum(["post", "check_in"]) }).strict(),
   check_in_created: z.object({ at_event: z.boolean() }).strict(),
   vibe_shared: z.object({ vibe_type: z.enum(VIBE_TYPES) }).strict(),

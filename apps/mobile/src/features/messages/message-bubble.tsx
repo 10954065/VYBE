@@ -1,5 +1,6 @@
 import { CHAT_MEDIA_BUCKET } from '@vybe/shared';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -42,6 +43,51 @@ function ChatPhoto({ message }: { message: ChatMessage }) {
   );
 }
 
+const SNAP_ICON_SIZE = 16;
+
+/**
+ * A snap in the chat, Snapchat-style: a coloured square (pink for a photo,
+ * violet for a video) that's filled until opened. Only the recipient can
+ * open it, once.
+ */
+function SnapBubble({ message, isMine }: { message: ChatMessage; isMine: boolean }) {
+  const isVideo = message.media_type === 'video';
+  const color = isVideo ? Colors.primary : Colors.secondaryStrong;
+  const isOpened = !!message.opened_at;
+  const canOpen = !isMine && !isOpened;
+  const label = isOpened ? 'Opened' : isMine ? 'Delivered' : isVideo ? 'New video snap' : 'New snap';
+
+  const content = (
+    <View style={[styles.snap, canOpen && { borderColor: color }]}>
+      {isMine ? (
+        <View style={[styles.snapArrow, { borderLeftColor: color }, isOpened && styles.snapArrowOpened]} />
+      ) : (
+        <View style={[styles.snapSquare, { borderColor: color }, !isOpened && { backgroundColor: color }]} />
+      )}
+      <View>
+        <ThemedText type="smallBold" style={{ color: canOpen ? color : Colors.text }}>
+          {label}
+        </ThemedText>
+        {canOpen && (
+          <ThemedText type="small" themeColor="textSecondary">
+            Tap to view
+          </ThemedText>
+        )}
+      </View>
+    </View>
+  );
+
+  if (!canOpen) return content;
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/snap/[id]', params: { id: message.id } })}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}. Tap to view, once`}>
+      {content}
+    </Pressable>
+  );
+}
+
 interface MessageBubbleProps {
   message: ChatMessage;
   isMine: boolean;
@@ -55,34 +101,40 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ message, isMine, isGroupEnd, status, partnerName, partnerAvatarUrl }: MessageBubbleProps) {
   const isPhoto = message.kind === 'photo' && !!message.media_path;
+  const isSnap = message.kind === 'snap';
   const time = formatMessageTime(message.created_at);
 
   return (
     <View
       style={[styles.row, isMine ? styles.rowMine : styles.rowTheirs, isGroupEnd && styles.rowGroupEnd]}
-      accessible
-      accessibilityLabel={`${isMine ? 'You' : partnerName}, ${time}: ${isPhoto ? 'Photo' : ''}${message.body ? ` ${message.body}` : ''}${status ? `. ${status}` : ''}`}>
+      // A snap is its own button (to open it), so the row isn't one block.
+      accessible={!isSnap}
+      accessibilityLabel={`${isMine ? 'You' : partnerName}, ${time}: ${isPhoto ? 'Photo' : isSnap ? 'Snap' : ''}${message.body ? ` ${message.body}` : ''}${status ? `. ${status}` : ''}`}>
       {!isMine && (
         <View style={styles.avatarSlot}>
           {isGroupEnd && <Avatar name={partnerName} uri={partnerAvatarUrl} size={PARTNER_AVATAR_SIZE} />}
         </View>
       )}
       <View style={[styles.column, isMine ? styles.columnMine : styles.columnTheirs]}>
-        <View
-          style={[
-            styles.bubble,
-            isMine ? styles.bubbleMine : styles.bubbleTheirs,
-            isGroupEnd && (isMine ? styles.tailMine : styles.tailTheirs),
-            isPhoto && styles.bubblePhoto,
-            message.isPending && styles.pending,
-          ]}>
-          {isPhoto && <ChatPhoto message={message} />}
-          {!!message.body && (
-            <ThemedText style={[styles.body, isMine && styles.bodyMine, isPhoto && styles.caption]}>
-              {message.body}
-            </ThemedText>
-          )}
-        </View>
+        {isSnap ? (
+          <SnapBubble message={message} isMine={isMine} />
+        ) : (
+          <View
+            style={[
+              styles.bubble,
+              isMine ? styles.bubbleMine : styles.bubbleTheirs,
+              isGroupEnd && (isMine ? styles.tailMine : styles.tailTheirs),
+              isPhoto && styles.bubblePhoto,
+              message.isPending && styles.pending,
+            ]}>
+            {isPhoto && <ChatPhoto message={message} />}
+            {!!message.body && (
+              <ThemedText style={[styles.body, isMine && styles.bodyMine, isPhoto && styles.caption]}>
+                {message.body}
+              </ThemedText>
+            )}
+          </View>
+        )}
         {isGroupEnd && (
           <ThemedText type="small" themeColor="textSecondary" style={styles.meta}>
             {time}
@@ -131,6 +183,30 @@ const styles = StyleSheet.create({
   bodyMine: { color: Colors.onPrimary },
   caption: { paddingHorizontal: 10, paddingTop: Spacing.one, paddingBottom: Spacing.one },
   meta: { fontSize: 11, paddingHorizontal: Spacing.one },
+  snap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: RADIUS,
+    borderWidth: 1,
+    borderColor: Colors.hairline,
+    backgroundColor: Colors.backgroundElement,
+    minWidth: 150,
+  },
+  snapSquare: { width: SNAP_ICON_SIZE, height: SNAP_ICON_SIZE, borderRadius: 3, borderWidth: 2 },
+  // A sent snap: a solid triangle pointing right, faded once opened.
+  snapArrow: {
+    width: 0,
+    height: 0,
+    borderTopWidth: SNAP_ICON_SIZE / 2,
+    borderBottomWidth: SNAP_ICON_SIZE / 2,
+    borderLeftWidth: SNAP_ICON_SIZE,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+  },
+  snapArrowOpened: { opacity: 0.45 },
   dividerRow: { alignItems: 'center', marginVertical: Spacing.three },
   divider: {
     borderRadius: 999,

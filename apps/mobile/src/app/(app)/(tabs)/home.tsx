@@ -23,6 +23,7 @@ import { useMyCrews } from '@/features/crews/use-my-crews';
 import { useMyOutsideStreak } from '@/features/gamification/use-my-streak';
 import { useMyXpTotal } from '@/features/gamification/use-my-xp-total';
 import { MessagesButton } from '@/features/messages/messages-button';
+import { SnapCameraButton } from '@/features/snaps/snap-camera-button';
 import { NotificationBell } from '@/features/notifications/notification-bell';
 import { useProfile } from '@/features/profile/use-profile';
 import { getErrorMessage } from '@/lib/get-error-message';
@@ -83,6 +84,7 @@ export default function HomeScreen() {
                     {greeting()}, {profile?.display_name ?? profile?.username} 👋
                   </ThemedText>
                   <View style={styles.heroActions}>
+                    <SnapCameraButton />
                     <MessagesButton />
                     <NotificationBell />
                   </View>

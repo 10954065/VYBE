@@ -5,5 +5,8 @@ export const POST_MEDIA_BUCKET = "post-media";
 /** Photos sent in chats (supabase/migrations/20261016000000_direct_messages.sql). */
 export const CHAT_MEDIA_BUCKET = "chat-media";
 
+/** Snap photos and videos (supabase/migrations/20261017000000_snaps_and_streaks.sql). */
+export const SNAPS_BUCKET = "snaps";
+
 /** Every bucket deleting an account must empty. Add each new user-upload bucket here. */
-export const USER_UPLOAD_BUCKETS = [POST_MEDIA_BUCKET, CHAT_MEDIA_BUCKET] as const;
+export const USER_UPLOAD_BUCKETS = [POST_MEDIA_BUCKET, CHAT_MEDIA_BUCKET, SNAPS_BUCKET] as const;

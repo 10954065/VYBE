@@ -16,6 +16,9 @@ function message(id: string, at: string, body = id): Message {
     media_path: null,
     media_width: null,
     media_height: null,
+    media_type: null,
+    media_duration_ms: null,
+    opened_at: null,
     created_at: new Date(at),
   };
 }

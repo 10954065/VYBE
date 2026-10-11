@@ -15,19 +15,37 @@ import { formatRelativeTime } from '@/lib/format-relative-time';
 import { getErrorMessage } from '@/lib/get-error-message';
 
 function preview(entry: InboxEntry, myId: string | undefined): string {
+  if (entry.unopened_snap_count > 0) {
+    return entry.unopened_snap_count > 1 ? `📸 ${entry.unopened_snap_count} new snaps` : '📸 New snap';
+  }
+  const isMine = entry.last_message_sender_id === myId;
+  if (entry.last_message_kind === 'snap') {
+    if (!isMine) return 'Opened a snap';
+    return entry.last_message_opened_at ? 'You sent a snap · Opened' : 'You sent a snap · Delivered';
+  }
   const text = entry.last_message_kind === 'photo' ? '📷 Photo' : (entry.last_message_body ?? '');
-  return entry.last_message_sender_id === myId ? `You: ${text}` : text;
+  return isMine ? `You: ${text}` : text;
+}
+
+function streakLabel(entry: InboxEntry): string | null {
+  if (entry.streak_count === 0) return null;
+  return `🔥 ${entry.streak_count}${entry.streak_expires_today ? ' ⏳' : ''}`;
 }
 
 function InboxRow({ entry, myId }: { entry: InboxEntry; myId: string | undefined }) {
   const name = entry.partner_display_name ?? entry.partner_username;
   const isUnread = entry.unread_count > 0;
+  const hasNewSnap = entry.unopened_snap_count > 0;
+  const streak = streakLabel(entry);
+  const streakDescription = streak
+    ? `, ${entry.streak_count}-day streak${entry.streak_expires_today ? ' ending tonight' : ''}`
+    : '';
 
   return (
     <Pressable
       onPress={() => router.push({ pathname: '/messages/[id]', params: { id: entry.conversation_id } })}
       accessibilityRole="button"
-      accessibilityLabel={`${name}${isUnread ? `, ${entry.unread_count} unread` : ''}. ${preview(entry, myId)}`}
+      accessibilityLabel={`${name}${streakDescription}${isUnread ? `, ${entry.unread_count} unread` : ''}. ${preview(entry, myId)}`}
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
       <Avatar name={name} uri={entry.partner_avatar_url} size={52} />
       <View style={styles.rowText}>
@@ -35,6 +53,11 @@ function InboxRow({ entry, myId }: { entry: InboxEntry; myId: string | undefined
           <ThemedText type={isUnread ? 'smallBold' : 'default'} numberOfLines={1} style={styles.name}>
             {name}
           </ThemedText>
+          {!!streak && (
+            <ThemedText type="smallBold" themeColor="secondary">
+              {streak}
+            </ThemedText>
+          )}
           <ThemedText type="small" themeColor="textSecondary">
             {formatRelativeTime(entry.last_message_at)}
           </ThemedText>
@@ -44,7 +67,7 @@ function InboxRow({ entry, myId }: { entry: InboxEntry; myId: string | undefined
             type={isUnread ? 'smallBold' : 'small'}
             themeColor={isUnread ? 'text' : 'textSecondary'}
             numberOfLines={1}
-            style={styles.preview}>
+            style={[styles.preview, hasNewSnap && styles.newSnap]}>
             {preview(entry, myId)}
           </ThemedText>
           {isUnread && (
@@ -135,6 +158,7 @@ const styles = StyleSheet.create({
   name: { flex: 1 },
   rowBottom: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
   preview: { flex: 1 },
+  newSnap: { color: Colors.secondaryStrong },
   unread: {
     minWidth: 20,
     height: 20,

@@ -1,4 +1,4 @@
-import { MESSAGE_MAX_LENGTH } from '@vybe/shared';
+import { liveStreak, MESSAGE_MAX_LENGTH } from '@vybe/shared';
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
@@ -74,6 +74,7 @@ function Chat({ conversationId }: { conversationId: string }) {
   const partnerReadAt = (isUserA ? conversation.data?.user_b_read_at : conversation.data?.user_a_read_at) ?? null;
   const newestFromPartner = items.find((item) => item.sender_id !== myId);
   const newestMine = items.find((item) => item.sender_id === myId);
+  const streak = conversation.data ? liveStreak(conversation.data) : null;
 
   // Reading the chat marks it read, including messages that arrive while
   // it's open. Stops once the read position has caught up (the update
@@ -145,6 +146,16 @@ function Chat({ conversationId }: { conversationId: string }) {
         }}
       />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+        {!!streak?.count && (
+          <View style={styles.streak} accessibilityLiveRegion="polite">
+            <ThemedText type="smallBold" style={styles.streakLabel}>
+              🔥 {streak.count}-day snap streak
+            </ThemedText>
+            <ThemedText type="small" themeColor={streak.endsTonight ? 'secondary' : 'textSecondary'}>
+              {streak.endsTonight ? '⏳ Ends tonight' : 'Kept today'}
+            </ThemedText>
+          </View>
+        )}
         {items.length === 0 && !messages.isLoading ? (
           <View style={styles.emptyState}>
             <Avatar name={partnerName || '?'} uri={partner.data?.avatar_url} size={72} />
@@ -171,7 +182,8 @@ function Chat({ conversationId }: { conversationId: string }) {
               const older = items[index + 1];
               const isMine = item.sender_id === myId;
               const isNewestMine = item.id === newestMine?.id;
-              const status = !isNewestMine
+              // A snap's bubble says Delivered / Opened itself.
+              const status = !isNewestMine || item.kind === 'snap'
                 ? undefined
                 : item.isPending
                   ? 'Sending…'
@@ -207,15 +219,30 @@ function Chat({ conversationId }: { conversationId: string }) {
           maxLength={MESSAGE_MAX_LENGTH}
           hasAttachment={!!photo}
           leading={
-            <Pressable
-              onPress={addPhoto}
-              disabled={isUploadingPhoto}
-              hitSlop={4}
-              style={styles.addPhoto}
-              accessibilityRole="button"
-              accessibilityLabel="Add a photo">
-              <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={20} weight="bold" tintColor={Colors.text} />
-            </Pressable>
+            <View style={styles.leading}>
+              <Pressable
+                onPress={() => partnerId && router.push({ pathname: '/snap/camera', params: { to: partnerId } })}
+                disabled={!partnerId}
+                hitSlop={4}
+                style={[styles.addPhoto, styles.snapButton]}
+                accessibilityRole="button"
+                accessibilityLabel="Send a snap">
+                <SymbolView
+                  name={{ ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' }}
+                  size={18}
+                  tintColor={Colors.onPrimary}
+                />
+              </Pressable>
+              <Pressable
+                onPress={addPhoto}
+                disabled={isUploadingPhoto}
+                hitSlop={4}
+                style={styles.addPhoto}
+                accessibilityRole="button"
+                accessibilityLabel="Add a photo">
+                <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={20} weight="bold" tintColor={Colors.text} />
+              </Pressable>
+            </View>
           }
           attachment={
             photo ? (
@@ -255,6 +282,23 @@ const styles = StyleSheet.create({
   loading: { paddingVertical: Spacing.three },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.two, padding: Spacing.four },
   unavailable: { padding: Spacing.five, textAlign: 'center' },
+  // The Stitch chat's "Social Streak" bar, under the header.
+  streak: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: Spacing.three,
+    marginTop: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    backgroundColor: 'rgba(249, 115, 22, 0.12)',
+  },
+  streakLabel: { color: Colors.secondary },
+  leading: { flexDirection: 'row', gap: Spacing.one },
+  snapButton: { backgroundColor: Colors.secondaryStrong },
   addPhoto: {
     width: ADD_PHOTO_SIZE,
     height: ADD_PHOTO_SIZE,

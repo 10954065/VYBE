@@ -43,7 +43,7 @@ describe("deleteUserUploads", () => {
       `post-media:${USER_ID}/a.jpg`,
       `post-media:${USER_ID}/b.jpg`,
     ]);
-    expect(USER_UPLOAD_BUCKETS).toEqual(["post-media", "chat-media"]);
+    expect(USER_UPLOAD_BUCKETS).toEqual(["post-media", "chat-media", "snaps"]);
   });
 
   it("keeps going past a full page of files", async () => {

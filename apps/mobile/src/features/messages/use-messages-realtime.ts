@@ -13,8 +13,9 @@ import { inboxQueryKey, unreadConversationsQueryKey } from './use-inbox';
  * One Realtime subscription for the signed-in user's messages, mounted
  * once for the whole app. Realtime only delivers rows the user's RLS lets
  * them read, so this hears exactly their own conversations: new messages
- * go straight into an open chat, and read receipts (a conversation row
- * update) into its "Seen". The inbox and the badge refetch.
+ * go straight into an open chat, opened snaps update in place, and read
+ * receipts and streaks (a conversation row update) reach its header. The
+ * inbox and the badge refetch.
  */
 export function useMessagesRealtime() {
   const { session } = useSession();
@@ -32,6 +33,16 @@ export function useMessagesRealtime() {
     const channel = supabase
       .channel(`messages:${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const parsed = messageSchema.safeParse(payload.new);
+        if (parsed.success) {
+          queryClient.setQueryData<MessagePages>(messagesQueryKey(parsed.data.conversation_id), (data) =>
+            withMessage(data, parsed.data),
+          );
+        }
+        refreshInbox();
+      })
+      // A snap being opened: the sender's "Delivered" becomes "Opened".
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, (payload) => {
         const parsed = messageSchema.safeParse(payload.new);
         if (parsed.success) {
           queryClient.setQueryData<MessagePages>(messagesQueryKey(parsed.data.conversation_id), (data) =>

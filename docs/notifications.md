@@ -41,6 +41,10 @@ This was verified against the real Expo push endpoint, not mocked: registering a
 
 A new message pushes to the other person (`handle_new_message`), gated by a new `notification_preferences.messages` toggle ("Direct messages" in settings). It deliberately writes no `notifications` row: chats have their own unread badge. See `docs/messages.md`.
 
+## Snap streak reminders (Phase 17)
+
+A second time-based job: at 18:00 Accra, `send_snap_streak_reminders` notifies whoever hasn't snapped yet today about a streak that ends at midnight (type `snap_streak`, gated by the existing Streaks toggle, at most once per streak per day). Tapping it opens the chat. See `docs/snaps.md`.
+
 ## Client
 
 - `features/notifications/` — `useNotifications` (last 50, actor profile embedded via `profiles!notifications_actor_id_fkey` since `notifications` has two FKs into `profiles`), `useUnreadNotificationCount`, `useMarkNotificationRead`/`useMarkAllNotificationsRead`, `useNotificationPreferences`/`useUpdateNotificationPreferences`, `useRegisterPushToken`, `usePushRegistration`.

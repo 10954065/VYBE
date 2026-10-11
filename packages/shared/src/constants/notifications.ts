@@ -16,6 +16,7 @@ export const NOTIFICATION_TYPES = [
   "xp_milestone",
   "badge_earned",
   "recommendation",
+  "snap_streak",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -32,6 +33,7 @@ export const NOTIFICATION_ICONS: Record<NotificationType, string> = {
   xp_milestone: "⭐",
   badge_earned: "🎖️",
   recommendation: "✨",
+  snap_streak: "⏳",
 };
 
 /**

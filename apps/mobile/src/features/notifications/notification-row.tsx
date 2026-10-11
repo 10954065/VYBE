@@ -34,6 +34,8 @@ function notificationTitle(notification: Notification): string {
       return notification.body ? `Badge earned: ${notification.body}` : 'Badge earned';
     case 'recommendation':
       return notification.body ?? 'New recommendation';
+    case 'snap_streak':
+      return notification.body ?? 'Your snap streak ends tonight';
   }
 }
 

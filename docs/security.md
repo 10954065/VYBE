@@ -39,6 +39,7 @@ Same mechanism as the existing check-in limit — a `BEFORE INSERT` trigger coun
 | Photo uploads, `post-media` (Phase 15) | 40 per 5 minutes |
 | `messages` (Phase 16) | 30 per minute |
 | Photo uploads, `chat-media` (Phase 16) | 20 per 5 minutes |
+| Snap uploads, `snaps` (Phase 17) | 30 per 5 minutes |
 
 The app shows a plain-language message when a limit is hit, and the analytics tracker drops (rather than retries) a rate-limited batch. Anonymous analytics have no user to limit by; that needs IP-level limiting at the edge, which belongs with deployment (Phase 18).
 
@@ -51,6 +52,7 @@ The app shows a plain-language message when a limit is hit, and the analytics tr
 - `030_visibility` — privacy levels, blocking, suspended users' content, and analytics privacy (Phases 4, 11, 12, 13).
 - `040_push_tokens` — the account-switch claim works and nothing else can reassign or read tokens.
 - `050_photo_posts` (Phase 15) — photo uploads, attachment and reading follow the post's audience; nobody can attach, plant or read someone else's photos.
+- `070_snaps_and_streaks` (Phase 17) — a snap is unreadable before opening and after its two-minute window, never readable by the sender or anyone else; streaks and reminders count correctly; the cleanup functions are service-role only.
 - `060_direct_messages` (Phase 16) — only the two people in a conversation can read it, post in it or open its photos; the follow rule, blocks and suspensions hold; senders, timestamps and read positions can't be forged.
 
 Separately, every write the mobile app makes was replayed through the API with the exact payloads its hooks send (25 actions, from onboarding to crew approval to analytics), to confirm the tighter permissions broke none of them.
@@ -77,7 +79,7 @@ A security review of the change (with live attempts against the local Storage AP
 
 Two smaller findings are open:
 
-- **Uploads that never get attached** (the app deletes them when a post fails, but a direct API caller needn't) are never swept. Deleting a file needs the Storage API, not SQL, so this belongs with the scheduled cleanup job snaps need (Phase 17).
+- **Uploads that never get attached** (the app deletes them when a post fails, but a direct API caller needn't) were never swept. Closed in Phase 17: the cleanup job removes them after a day.
 - **File contents aren't checked against the declared type.** A text file uploaded as `image/jpeg` is accepted and served back as `image/jpeg`. Images are only ever displayed as images, where embedded script doesn't run, so this is low risk; checking magic bytes would need server-side processing of every upload.
 
 **Account deletion now removes uploads.** Deleting an account cascades through every table, but Storage has no foreign key to users, so a deleted account's photos used to stay in the bucket. `/api/account/delete` now deletes the user's files from every bucket in `USER_UPLOAD_BUCKETS` first (and leaves the account intact, for a retry, if that fails). Verified: a throwaway account with two photos deleted through the real route left zero files behind.
@@ -90,6 +92,12 @@ See `docs/messages.md` for the rules. Two choices worth knowing:
 - **Realtime relies on RLS, not a channel filter.** The app subscribes to all `messages` and `conversations` changes; Realtime checks each row against the subscriber's own select policy before delivering it.
 
 A security review found no cross-conversation read or write, and three issues that were fixed before release: a suspended partner's chat could still be reopened (definer functions now repeat the suspension rule), message pushes could be sent 30 a minute (now one per burst), and the push title was the sender's raw display name (now cleaned and capped). Details in `docs/messages.md`.
+
+## Snaps (Phase 17)
+
+"Opens once" is enforced by Storage RLS, not by the app: the `snaps` bucket's read rule only admits the recipient, within two minutes of `open_snap` recording the open, and nothing can clear `opened_at`. See `docs/snaps.md`. The cleanup endpoint uses the service role, so it's behind `CRON_SECRET` (compared in constant time) and refuses all requests when the secret isn't set; the database functions it calls are executable by `service_role` only.
+
+The snaps security review found two issues, fixed before release: display names went into notifications and pushes verbatim (a crafted name could pose as a system alert; the database now refuses control characters and names over 60 characters, and all notifications name people through `notification_name`), and `open_snap` didn't respect suspensions. Details in `docs/snaps.md`.
 
 ## Still open
 

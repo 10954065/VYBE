@@ -502,9 +502,13 @@ export type Database = {
           created_at: string;
           id: string;
           last_message_at: string | null;
+          streak_count: number;
+          streak_day: string | null;
           user_a: string;
+          user_a_last_snap_on: string | null;
           user_a_read_at: string | null;
           user_b: string;
+          user_b_last_snap_on: string | null;
           user_b_read_at: string | null;
         };
         ComputedFields: never;
@@ -512,18 +516,26 @@ export type Database = {
           created_at?: string;
           id?: string;
           last_message_at?: string | null;
+          streak_count?: number;
+          streak_day?: string | null;
           user_a: string;
+          user_a_last_snap_on?: string | null;
           user_a_read_at?: string | null;
           user_b: string;
+          user_b_last_snap_on?: string | null;
           user_b_read_at?: string | null;
         };
         Update: {
           created_at?: string;
           id?: string;
           last_message_at?: string | null;
+          streak_count?: number;
+          streak_day?: string | null;
           user_a?: string;
+          user_a_last_snap_on?: string | null;
           user_a_read_at?: string | null;
           user_b?: string;
+          user_b_last_snap_on?: string | null;
           user_b_read_at?: string | null;
         };
         Relationships: [
@@ -837,9 +849,13 @@ export type Database = {
           created_at: string;
           id: string;
           kind: string;
+          media_duration_ms: number | null;
           media_height: number | null;
           media_path: string | null;
+          media_purged_at: string | null;
+          media_type: string | null;
           media_width: number | null;
+          opened_at: string | null;
           sender_id: string;
         };
         ComputedFields: never;
@@ -849,9 +865,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
+          media_duration_ms?: number | null;
           media_height?: number | null;
           media_path?: string | null;
+          media_purged_at?: string | null;
+          media_type?: string | null;
           media_width?: number | null;
+          opened_at?: string | null;
           sender_id: string;
         };
         Update: {
@@ -860,9 +880,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           kind?: string;
+          media_duration_ms?: number | null;
           media_height?: number | null;
           media_path?: string | null;
+          media_purged_at?: string | null;
+          media_type?: string | null;
           media_width?: number | null;
+          opened_at?: string | null;
           sender_id?: string;
         };
         Relationships: [
@@ -1772,6 +1796,7 @@ export type Database = {
       };
     };
     Functions: {
+      accra_today: { Args: Record<PropertyKey, never>; Returns: string };
       are_blocked: { Args: { a: string; b: string }; Returns: boolean };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       award_xp: {
@@ -1923,12 +1948,16 @@ export type Database = {
           last_message_at: string;
           last_message_body: string;
           last_message_kind: string;
+          last_message_opened_at: string;
           last_message_sender_id: string;
           partner_avatar_url: string;
           partner_display_name: string;
           partner_id: string;
           partner_read_at: string;
           partner_username: string;
+          streak_count: number;
+          streak_expires_today: boolean;
+          unopened_snap_count: number;
           unread_count: number;
         }[];
       };
@@ -1955,9 +1984,13 @@ export type Database = {
           created_at: string;
           id: string;
           kind: string;
+          media_duration_ms: number | null;
           media_height: number | null;
           media_path: string | null;
+          media_purged_at: string | null;
+          media_type: string | null;
           media_width: number | null;
+          opened_at: string | null;
           sender_id: string;
         }[];
         SetofOptions: {
@@ -2013,6 +2046,13 @@ export type Database = {
           distinct_events: number;
           distinct_places: number;
           longest_outside_streak: number;
+        }[];
+      };
+      get_orphaned_uploads: {
+        Args: { p_limit?: number };
+        Returns: {
+          bucket_id: string;
+          name: string;
         }[];
       };
       get_people_outside_now: {
@@ -2080,6 +2120,12 @@ export type Database = {
           following_count: number;
         }[];
       };
+      get_purgeable_snaps: {
+        Args: { p_limit?: number };
+        Returns: {
+          media_path: string;
+        }[];
+      };
       get_recommended_crews: {
         Args: { result_limit?: number };
         Returns: {
@@ -2142,6 +2188,17 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      get_snap_recipients: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          id: string;
+          is_friend: boolean;
+          streak_count: number;
+          username: string;
+        }[];
+      };
       get_social_proof: {
         Args: { target: string; viewer: string };
         Returns: {
@@ -2174,6 +2231,9 @@ export type Database = {
       is_suspended: { Args: { p_user_id: string }; Returns: boolean };
       level_for_xp: { Args: { p_total_xp: number }; Returns: number };
       mark_conversation_read: { Args: { p_conversation: string }; Returns: undefined };
+      mark_snaps_purged: { Args: { p_paths: string[] }; Returns: undefined };
+      notification_name: { Args: { p_user: string }; Returns: string };
+      open_snap: { Args: { p_message: string }; Returns: string };
       post_media_json: { Args: { p_post_id: string }; Returns: Json };
       register_push_token: { Args: { p_platform: string; p_token: string }; Returns: undefined };
       search_crews: {
@@ -2223,6 +2283,18 @@ export type Database = {
         Args: { p_body: string; p_data?: Json; p_title: string; p_user_id: string };
         Returns: undefined;
       };
+      send_snap: {
+        Args: {
+          p_duration_ms?: number;
+          p_height?: number;
+          p_media_path: string;
+          p_media_type: string;
+          p_recipients: string[];
+          p_width?: number;
+        };
+        Returns: number;
+      };
+      send_snap_streak_reminders: { Args: Record<PropertyKey, never>; Returns: undefined };
       show_limit: { Args: Record<PropertyKey, never>; Returns: number };
       show_trgm: { Args: { "": string }; Returns: string[] };
       start_direct_conversation: { Args: { p_user: string }; Returns: string };

@@ -83,3 +83,5 @@ A review of this phase, with live attempts as an outsider against the local data
 - Opening a chat from a push notification.
 - Typing indicators, deleting messages, message reactions.
 - Group chats.
+
+Snaps (photos and videos that open once) and snap streaks live in the same conversations; see `docs/snaps.md`.

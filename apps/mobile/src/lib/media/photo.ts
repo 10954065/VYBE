@@ -14,15 +14,15 @@ export interface LocalPhoto {
 }
 
 /**
- * Shrinks a photo to at most PHOTO_MAX_EDGE on its long side and re-encodes
+ * Shrinks a photo to at most `maxEdge` (PHOTO_MAX_EDGE) on its long side and re-encodes
  * it as JPEG. Re-encoding also drops the original's metadata, including the
  * GPS location phones write into every photo.
  */
-export async function preparePhoto(photo: LocalPhoto): Promise<LocalPhoto> {
+export async function preparePhoto(photo: LocalPhoto, maxEdge: number = PHOTO_MAX_EDGE): Promise<LocalPhoto> {
   const context = ImageManipulator.manipulate(photo.uri);
   const longEdge = Math.max(photo.width, photo.height);
-  if (longEdge > PHOTO_MAX_EDGE) {
-    context.resize(photo.width >= photo.height ? { width: PHOTO_MAX_EDGE } : { height: PHOTO_MAX_EDGE });
+  if (longEdge > maxEdge) {
+    context.resize(photo.width >= photo.height ? { width: maxEdge } : { height: maxEdge });
   }
   const image = await context.renderAsync();
   const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: PHOTO_JPEG_QUALITY });

@@ -157,7 +157,9 @@ reset role;
 -- ------------------------------------------------------------------- push
 -- Pushes leave through pg_net's queue; counting it shows what would be sent.
 insert into public.push_tokens (user_id, token, platform) values (:'bob', 'ExponentPushToken[m_bob_test]', 'ios');
-update public.profiles set display_name = E'VYBE Security\nAlert: verify your account right now please' where id = :'alice';
+-- Line breaks can't get into a display name at all any more (070 tests
+-- that); the push still caps a long one.
+update public.profiles set display_name = 'VYBE Security Alert verify your account right now please' where id = :'alice';
 -- The earlier messages were a while ago, so the next one starts a new burst.
 update public.messages set created_at = now() - interval '1 hour' where conversation_id = :'convo';
 select count(*) as pushes_before from net.http_request_queue \gset

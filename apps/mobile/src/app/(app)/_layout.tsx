@@ -20,6 +20,8 @@ export default function AppLayout() {
       <Stack.Screen name="messages/index" options={{ title: 'Messages' }} />
       <Stack.Screen name="messages/new" options={{ title: 'New message' }} />
       <Stack.Screen name="messages/[id]" options={{ title: '' }} />
+      <Stack.Screen name="snap/camera" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
+      <Stack.Screen name="snap/[id]" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'fade' }} />
       <Stack.Screen name="profile/notification-preferences" options={{ title: 'Notifications' }} />
       <Stack.Screen name="profile/blocked-users" options={{ title: 'Blocked users' }} />
       <Stack.Screen name="profile/[id]" options={{ title: 'Profile' }} />
